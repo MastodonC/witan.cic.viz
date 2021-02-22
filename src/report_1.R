@@ -1,4 +1,3 @@
-
 loadfonts()
 ### `font_import()` should be run initially to ensure required fonts are present
 
@@ -18,6 +17,10 @@ report_1 <- function(actual_episodes_file) {
     group_by(ID) %>% 
     summarise(birthday = imputed_birthday(DOB[1], min(report_date), coalesce(max(ceased), end_date)))
   episodes <- episodes %>% inner_join(birthdays)
+  episodes <- episodes %>% 
+    group_by(phase_id) %>% 
+    mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
+    ungroup
 }
 
 # report_1('~/code/witan.cic/data/episodes.scrubbed.csv')
