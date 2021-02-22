@@ -14,4 +14,10 @@ report_1 <- function(actual_episodes_file) {
                               stringsAsFactors = FALSE, na.strings ="NA")
   episodes$report_date <- ymd(episodes$report_date)
   episodes$ceased <- ymd(episodes$ceased)
+  birthdays <- episodes %>% 
+    group_by(ID) %>% 
+    summarise(birthday = imputed_birthday(DOB[1], min(report_date), coalesce(max(ceased), end_date)))
+  episodes <- episodes %>% inner_join(birthdays)
 }
+
+# report_1('~/code/witan.cic/data/episodes.scrubbed.csv')
