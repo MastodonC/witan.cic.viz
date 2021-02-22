@@ -1,3 +1,5 @@
+library(dplyr)
+library(lubridate)
 loadfonts()
 ### `font_import()` should be run initially to ensure required fonts are present
 
