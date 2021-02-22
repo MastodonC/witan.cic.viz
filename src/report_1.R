@@ -3,6 +3,14 @@ library(lubridate)
 loadfonts()
 ### `font_import()` should be run initially to ensure required fonts are present
 
+month_start <- function(month) {
+  as.Date(paste0(month, "-01"))
+}
+
+month_end <- function(month) {
+  as.Date(paste0(month, "-01")) + months(1) - days(1)
+}
+
 impute_birthday <- function(birth_month, min_start, max_cease) {
   earliest_possible <- max(max_cease - days(floor(18 * 365.25)) + 1, month_start(birth_month))
   latest_possible <- min(min_start, month_end(birth_month))
