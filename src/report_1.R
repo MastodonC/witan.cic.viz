@@ -61,7 +61,14 @@ report_1 <- function(actual_episodes_file, projected_episodes_file) {
     group_by(phase_id) %>% 
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
+  
+  projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="")
+  projected_episodes$Start <- ymd(projected_episodes$Start)
+  projected_episodes$End <- ymd(projected_episodes$End)
+  projected_episodes$Birthday <- ymd(projected_episodes$Birthday)
 }
 
 # actual_episodes_file <- '~/code/witan.cic/data/episodes.scrubbed.csv'
+# projected_episodes_file <- 'scc-episodes-2019-08-13-rewind-1yr-train-3yr-project-5yr-runs-100-seed-42-universe.csv'
+# output_file <- "out.pdf"
 # report_1('~/code/witan.cic/data/episodes.scrubbed.csv')
