@@ -66,6 +66,12 @@ report_1 <- function(actual_episodes_file, projected_episodes_file) {
   projected_episodes$Start <- ymd(projected_episodes$Start)
   projected_episodes$End <- ymd(projected_episodes$End)
   projected_episodes$Birthday <- ymd(projected_episodes$Birthday)
+  
+  colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
+  names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
+  
+  dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") ## TODO make intelligent or as args
+  
 }
 
 # actual_episodes_file <- '~/code/witan.cic/data/episodes.scrubbed.csv'
