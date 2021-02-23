@@ -1,6 +1,6 @@
 library(dplyr)
 library(lubridate)
-loadfonts()
+library(tidyquant)
 ### `font_import()` should be run initially to ensure required fonts are present
 
 month_start <- function(month) {
@@ -9,6 +9,16 @@ month_start <- function(month) {
 
 month_end <- function(month) {
   as.Date(paste0(month, "-01")) + months(1) - days(1)
+}
+
+date_between <- function(start, end) {
+  out <- numeric(length = length(start))
+  for(i in seq_along(start)) {
+    out[i] <- sample(seq(min(start[i], end[i]),
+                         max(start[i], end[i]),
+                         by = "day"), 1)
+  }
+  as.Date(out)
 }
 
 impute_birthday <- function(birth_month, min_start, max_cease) {
