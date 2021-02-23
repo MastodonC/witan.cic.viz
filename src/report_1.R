@@ -27,6 +27,10 @@ impute_birthday <- function(birth_month, min_start, max_cease) {
   date_between(earliest_possible, latest_possible)
 }
 
+year_diff <- function(start, stop) {
+  as.numeric(difftime(stop, start, units = "days")) %/% 365.25
+}
+
 report_1 <- function(actual_episodes_file) {
   set.seed(5)
   actual_episodes <- read.csv(actual_episodes_file, header = TRUE, 
