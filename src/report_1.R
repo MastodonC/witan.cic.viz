@@ -1,6 +1,8 @@
 library(dplyr)
 library(lubridate)
 library(tidyquant)
+library(extrafont)
+# loadfonts() # <- possibly not needed
 ### `font_import()` should be run initially to ensure required fonts are present
 
 month_start <- function(month) {
