@@ -101,6 +101,11 @@ report_1 <- function(actual_episodes_file, projected_episodes_file) {
           labs(title = "CiC", x = "Date", y = "CiC"))
 }
 
+pdf(output_file, paper = "a4r")
+report_1(actual_episodes_file, projected_episodes_file)
+dev.off()
+embed_fonts(file = output_file, outfile = output_file)
+
 # actual_episodes_file <- '~/code/witan.cic/data/episodes.scrubbed.csv'
 # projected_episodes_file <- 'scc-episodes-2019-08-13-rewind-1yr-train-3yr-project-5yr-runs-100-seed-42-universe.csv'
 # output_file <- "out.pdf"
