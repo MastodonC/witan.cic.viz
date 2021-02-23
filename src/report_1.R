@@ -33,7 +33,20 @@ year_diff <- function(start, stop) {
   as.numeric(difftime(stop, start, units = "days")) %/% 365.25
 }
 
-report_1 <- function(actual_episodes_file) {
+theme_mastodon <- theme(plot.title = element_text(
+  hjust = 0.5, size = 20,
+  margin = margin(0,0,15,0)),
+  axis.title = element_text(
+    hjust = 0.5, size = 16),
+  axis.text = element_text(
+    hjust = 0.5, size = 10),
+  axis.text.x = element_text(angle = -45),
+  axis.title.x = element_text(margin = margin(15,0,0,0)),
+  axis.title.y = element_text(margin = margin(0,10,0,0)),
+  plot.margin = margin(10,20,10,10),
+  panel.grid = element_line(color = "#eeeeee"))
+
+report_1 <- function(actual_episodes_file, projected_episodes_file) {
   set.seed(5)
   actual_episodes <- read.csv(actual_episodes_file, header = TRUE, 
                               stringsAsFactors = FALSE, na.strings ="NA")
