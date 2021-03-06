@@ -2,6 +2,7 @@ library(dplyr)
 library(lubridate)
 library(tidyquant)
 library(extrafont)
+library(beepr)
 # loadfonts() # <- possibly not needed
 ### `font_import()` should be run initially to ensure required fonts are present
 
@@ -99,6 +100,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file) {
           theme_mastodon +
           scale_color_manual(values = colours) +
           labs(title = "CiC", x = "Date", y = "CiC"))
+  beep()
 }
 
 pdf(output_file, paper = "a4r")
