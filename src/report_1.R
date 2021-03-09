@@ -49,20 +49,21 @@ theme_mastodon <- theme(plot.title = element_text(
 
 report_1 <- function(actual_episodes_file, projected_episodes_file) {
   set.seed(5)
+  
   actual_episodes <- read.csv(actual_episodes_file, header = TRUE, 
-                              stringsAsFactors = FALSE, na.strings ="NA")
-  actual_episodes$report_date <- ymd(actual_episodes$report_date)
-  actual_episodes$ceased <- ymd(actual_episodes$ceased)
+                              stringsAsFactors = FALSE, na.strings ="NA") %>% 
+    mutate(report_date = ymd(report_date),
+           ceased = ymd(ceased))
   end_date <- max(c(actual_episodes$ceased, actual_episodes$report_date), na.rm = TRUE)
   birthdays <- actual_episodes %>% 
     group_by(ID) %>% 
     summarise(birthday = impute_birthday(DOB[1], min(report_date), coalesce(max(ceased), end_date)))
-  actual_episodes <- actual_episodes %>% inner_join(birthdays)
   actual_episodes <- actual_episodes %>% 
+    inner_join(birthdays) %>% 
     group_by(phase_id) %>% 
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
-  
+
   projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="")
   projected_episodes$Start <- ymd(projected_episodes$Start)
   projected_episodes$End <- ymd(projected_episodes$End)
