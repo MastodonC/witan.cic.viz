@@ -64,10 +64,10 @@ report_1 <- function(actual_episodes_file, projected_episodes_file) {
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
 
-  projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="")
-  projected_episodes$Start <- ymd(projected_episodes$Start)
-  projected_episodes$End <- ymd(projected_episodes$End)
-  projected_episodes$Birthday <- ymd(projected_episodes$Birthday)
+  projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="") %>%
+    mutate(Start = ymd(Start),
+           End = ymd(End),
+           Birthday = ymd(Birthday))
   
   colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
   names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
