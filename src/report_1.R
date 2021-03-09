@@ -87,26 +87,26 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
                                                            q1 = c(quants[2]), median = c(quants[3]), 
                                                            q3 = c(quants[4]), upper.ci = c(quants[5])))
   }
-  actuals <- data.frame(date = c(), variable = c(), value = c())
   projected_totals <- projected_totals %>%
     mutate(date = ymd(date)) %>% 
     filter(lower.ci != upper.ci)
   
+  actual_totals <- data.frame(date = c(), variable = c(), value = c())
   for (date in dates) {
     counts <- actual_episodes %>%
       filter(report_date <= date & (is.na(ceased) | ceased > date)) %>%
       summarise(n = n())
-    actuals <- rbind(actuals, data.frame(date = c(date), variable = c("actual"), value = c(counts[[1]])))
+    actual_totals <- rbind(actual_totals, data.frame(date = c(as.Date(date)), variable = c("actual"), value = c(counts[[1]])))
   }
-  actuals$date <- as.Date(actuals$date)
-  print(ggplot() +
-          geom_line(data = actuals, aes(x = date, y = value)) +
-          geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2) +
-          geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), fill = "gray", alpha = 0.3) +
-          geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), fill = "gray", alpha = 0.3) +
-          theme_mastodon +
-          scale_color_manual(values = colours) +
-          labs(title = "CiC", x = "Date", y = "CiC"))
+  actual_totals$date <- ymd(actual_totals$date)
+  ggplot() +
+    geom_line(data = actual_totals, aes(x = date, y = value)) +
+    geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2) +
+    geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), fill = "gray", alpha = 0.3) +
+    geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), fill = "gray", alpha = 0.3) +
+    theme_mastodon +
+    scale_color_manual(values = colours) +
+    labs(title = "CiC", x = "Date", y = "CiC")
   
   beep()
   
