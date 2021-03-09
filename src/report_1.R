@@ -1,4 +1,4 @@
-library(dplyr)
+library(tidyverse)
 library(lubridate)
 library(tidyquant)
 library(extrafont)
