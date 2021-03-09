@@ -83,7 +83,9 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
       group_by(Simulation) %>%
       summarise(n = n())
     quants <- quantile(counts_by_simulation$n, probs = c(0.05, 0.25, 0.5, 0.75, 0.975))
-    projected_totals <- rbind(projected_totals, data.frame(date = c(date), lower.ci = c(quants[1]), q1 = c(quants[2]), median = c(quants[3]), q3 = c(quants[4]), upper.ci = c(quants[5])))
+    projected_totals <- rbind(projected_totals, data.frame(date = c(ymd(date)), lower.ci = c(quants[1]), 
+                                                           q1 = c(quants[2]), median = c(quants[3]), 
+                                                           q3 = c(quants[4]), upper.ci = c(quants[5])))
   }
   projected_totals$date <- as.Date(projected_totals$date)
   projected_totals <- projected_totals %>% filter(lower.ci != upper.ci)
