@@ -47,7 +47,7 @@ theme_mastodon <- theme(plot.title = element_text(
   plot.margin = margin(10,20,10,10),
   panel.grid = element_line(color = "#eeeeee"))
 
-report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL) {
+report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, counts_file = NULL) {
   
   set.seed(5)
   colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
@@ -67,6 +67,10 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
     group_by(phase_id) %>% 
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
+  
+  if(!is.null(counts_file)) {
+    counts <- process_counts(counts_file)
+  }
 
   if(is.null(projected_episodes_file)) {
     projected_episodes <- NULL
