@@ -49,6 +49,11 @@ theme_mastodon <- theme(plot.title = element_text(
 
 report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, counts_file = NULL) {
   
+  plot(0:10, type = "n", xaxt="n", yaxt="n", bty="n", xlab = "", ylab = "")
+  text(5, 10, "Report 1", cex=2.5)
+  text(5, 8, "2021-XX-XX", cex=2.5) ## TODO take date from config
+  text(5, 6, "\"LA\" CiC Projection", cex=2.5) ## TODO take LA name from config
+  
   set.seed(5)
   colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
   names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
