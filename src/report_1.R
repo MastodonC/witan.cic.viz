@@ -78,17 +78,18 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
   ## in there I can use it to then implement @christaylor’s wish of charting 5yrs in the past and two (or n) 
   ## years into the future
   
-  projected <- data.frame(date = c(), lower.ci = c(), q1 = c(), median = c(), q3 = c(), upper.ci = c())
+  ### Total in CiC
+  projected_totals <- data.frame(date = c(), lower.ci = c(), q1 = c(), median = c(), q3 = c(), upper.ci = c())
   for (date in dates) {
     counts_by_simulation <- projected_episodes %>%
       filter(Start <= date & (is.na(End) | End >= date)) %>%
       group_by(Simulation) %>%
       summarise(n = n())
     quants <- quantile(counts_by_simulation$n, probs = c(0.05, 0.25, 0.5, 0.75, 0.975))
-    projected <- rbind(projected, data.frame(date = c(date), lower.ci = c(quants[1]), q1 = c(quants[2]), median = c(quants[3]), q3 = c(quants[4]), upper.ci = c(quants[5])))
+    projected_totals <- rbind(projected_totals, data.frame(date = c(date), lower.ci = c(quants[1]), q1 = c(quants[2]), median = c(quants[3]), q3 = c(quants[4]), upper.ci = c(quants[5])))
   }
-  projected$date <- as.Date(projected$date)
-  projected <- projected %>% filter(lower.ci != upper.ci)
+  projected_totals$date <- as.Date(projected_totals$date)
+  projected_totals <- projected_totals %>% filter(lower.ci != upper.ci)
   actuals <- data.frame(date = c(), variable = c(), value = c())
   for (date in dates) {
     counts <- actual_episodes %>%
@@ -99,13 +100,15 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
   actuals$date <- as.Date(actuals$date)
   print(ggplot() +
           geom_line(data = actuals, aes(x = date, y = value)) +
-          geom_line(data = projected, aes(x = date, y = median), linetype = 2) +
-          geom_ribbon(data = projected, aes(x = date, ymin = lower.ci, ymax = upper.ci), fill = "gray", alpha = 0.3) +
-          geom_ribbon(data = projected, aes(x = date, ymin = q1, ymax = q3), fill = "gray", alpha = 0.3) +
+          geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2) +
+          geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), fill = "gray", alpha = 0.3) +
+          geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), fill = "gray", alpha = 0.3) +
           theme_mastodon +
           scale_color_manual(values = colours) +
           labs(title = "CiC", x = "Date", y = "CiC"))
+  
   beep()
+  
 }
 
 pdf(output_file, paper = "a4r")
