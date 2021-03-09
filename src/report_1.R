@@ -47,8 +47,11 @@ theme_mastodon <- theme(plot.title = element_text(
   plot.margin = margin(10,20,10,10),
   panel.grid = element_line(color = "#eeeeee"))
 
-report_1 <- function(actual_episodes_file, projected_episodes_file) {
+report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL) {
+  
   set.seed(5)
+  colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
+  names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
   
   actual_episodes <- read.csv(actual_episodes_file, header = TRUE, 
                               stringsAsFactors = FALSE, na.strings ="NA") %>% 
@@ -68,9 +71,6 @@ report_1 <- function(actual_episodes_file, projected_episodes_file) {
     mutate(Start = ymd(Start),
            End = ymd(End),
            Birthday = ymd(Birthday))
-  
-  colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
-  names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
   
   dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") ## TODO make intelligent or as args
   
