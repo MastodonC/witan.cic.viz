@@ -52,6 +52,7 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
   set.seed(5)
   colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
   names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
+  dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") ## TODO take dates from config file
   
   actual_episodes <- read.csv(actual_episodes_file, header = TRUE, 
                               stringsAsFactors = FALSE, na.strings ="NA") %>% 
@@ -75,11 +76,6 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
              End = ymd(End),
              Birthday = ymd(Birthday))
   }
-  
-  
-  
-  dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") 
-  ## TODO take dates from config file
   
   ### Total in CiC
   projected_totals <- data.frame(date = c(), lower.ci = c(), q1 = c(), median = c(), q3 = c(), upper.ci = c())
