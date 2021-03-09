@@ -72,7 +72,7 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
            End = ymd(End),
            Birthday = ymd(Birthday))
   
-  dates <- seq(ymd("2016-01-01"), ymd("2020-02-01"), by = "week") 
+  dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") 
   ## TODO take dates from config file
   
   ### Total in CiC
@@ -83,13 +83,15 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
       group_by(Simulation) %>%
       summarise(n = n())
     quants <- quantile(counts_by_simulation$n, probs = c(0.05, 0.25, 0.5, 0.75, 0.975))
-    projected_totals <- rbind(projected_totals, data.frame(date = c(ymd(date)), lower.ci = c(quants[1]), 
+    projected_totals <- rbind(projected_totals, data.frame(date = c(as.Date(date)), lower.ci = c(quants[1]), 
                                                            q1 = c(quants[2]), median = c(quants[3]), 
                                                            q3 = c(quants[4]), upper.ci = c(quants[5])))
   }
-  projected_totals$date <- as.Date(projected_totals$date)
-  projected_totals <- projected_totals %>% filter(lower.ci != upper.ci)
   actuals <- data.frame(date = c(), variable = c(), value = c())
+  projected_totals <- projected_totals %>%
+    mutate(date = ymd(date)) %>% 
+    filter(lower.ci != upper.ci)
+  
   for (date in dates) {
     counts <- actual_episodes %>%
       filter(report_date <= date & (is.na(ceased) | ceased > date)) %>%
