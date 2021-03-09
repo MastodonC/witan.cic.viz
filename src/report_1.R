@@ -72,11 +72,8 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
            End = ymd(End),
            Birthday = ymd(Birthday))
   
-  dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") 
-  ## TODO assume that the minimum Start date in the wholly simulated (S) projected episodes is also the 
-  ## projection start date? I am trying to make the charting more “intelligent” and if that data point is 
-  ## in there I can use it to then implement @christaylor’s wish of charting 5yrs in the past and two (or n) 
-  ## years into the future
+  dates <- seq(ymd("2016-01-01"), ymd("2020-02-01"), by = "week") 
+  ## TODO take dates from config file
   
   ### Total in CiC
   projected_totals <- data.frame(date = c(), lower.ci = c(), q1 = c(), median = c(), q3 = c(), upper.ci = c())
