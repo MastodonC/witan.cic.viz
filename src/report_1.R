@@ -67,29 +67,37 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
 
-  projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="") %>%
-    mutate(Start = ymd(Start),
-           End = ymd(End),
-           Birthday = ymd(Birthday))
+  if(is.null(projected_episodes_file)) {
+    projected_episodes <- NULL
+  } else {
+    projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="") %>%
+      mutate(Start = ymd(Start),
+             End = ymd(End),
+             Birthday = ymd(Birthday))
+  }
+  
+  
   
   dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") 
   ## TODO take dates from config file
   
   ### Total in CiC
   projected_totals <- data.frame(date = c(), lower.ci = c(), q1 = c(), median = c(), q3 = c(), upper.ci = c())
-  for (date in dates) {
-    counts_by_simulation <- projected_episodes %>%
-      filter(Start <= date & (is.na(End) | End >= date)) %>%
-      group_by(Simulation) %>%
-      summarise(n = n())
-    quants <- quantile(counts_by_simulation$n, probs = c(0.05, 0.25, 0.5, 0.75, 0.975))
-    projected_totals <- rbind(projected_totals, data.frame(date = c(as.Date(date)), lower.ci = c(quants[1]), 
-                                                           q1 = c(quants[2]), median = c(quants[3]), 
-                                                           q3 = c(quants[4]), upper.ci = c(quants[5])))
+  if(!is.null(projected_episodes_file)) {
+    for (date in dates) {
+      counts_by_simulation <- projected_episodes %>%
+        filter(Start <= date & (is.na(End) | End >= date)) %>%
+        group_by(Simulation) %>%
+        summarise(n = n())
+      quants <- quantile(counts_by_simulation$n, probs = c(0.05, 0.25, 0.5, 0.75, 0.975))
+      projected_totals <- rbind(projected_totals, data.frame(date = c(as.Date(date)), lower.ci = c(quants[1]), 
+                                                             q1 = c(quants[2]), median = c(quants[3]), 
+                                                             q3 = c(quants[4]), upper.ci = c(quants[5])))
+    }
+    projected_totals <- projected_totals %>%
+      mutate(date = ymd(date)) %>% 
+      filter(lower.ci != upper.ci)
   }
-  projected_totals <- projected_totals %>%
-    mutate(date = ymd(date)) %>% 
-    filter(lower.ci != upper.ci)
   
   actual_totals <- data.frame(date = c(), variable = c(), value = c())
   for (date in dates) {
@@ -99,15 +107,18 @@ report_1 <- function(actual_episodes_file = NULL, projected_episodes_file = NULL
     actual_totals <- rbind(actual_totals, data.frame(date = c(as.Date(date)), variable = c("actual"), value = c(counts[[1]])))
   }
   actual_totals$date <- ymd(actual_totals$date)
-  ggplot() +
-    geom_line(data = actual_totals, aes(x = date, y = value)) +
-    geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2) +
-    geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), fill = "gray", alpha = 0.3) +
-    geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), fill = "gray", alpha = 0.3) +
-    theme_mastodon +
-    scale_color_manual(values = colours) +
-    labs(title = "CiC", x = "Date", y = "CiC")
+  print(ggplot() +
+          geom_line(data = actual_totals, aes(x = date, y = value)) +
+          {if(!is.null(projected_episodes_file)) list(geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2),
+                                                     geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), 
+                                                                 fill = "gray", alpha = 0.3),
+                                                     geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), 
+                                                                 fill = "gray", alpha = 0.3))} +
+          theme_mastodon +
+          scale_color_manual(values = colours) +
+          labs(title = "CiC", x = "Date", y = "CiC"))
   
+
   beep()
   
 }
