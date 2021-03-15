@@ -47,6 +47,11 @@ theme_mastodon <- theme(plot.title = element_text(
   plot.margin = margin(10,20,10,10),
   panel.grid = element_line(color = "#eeeeee"))
 
+project_from <- as.Date("2020-03-31")
+project_yrs <- 2
+train_from <- project_from - years(3)
+projection_end <- project_from + years(project_yrs)
+
 report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, counts_file = NULL) {
   
   plot(0:10, type = "n", xaxt="n", yaxt="n", bty="n", xlab = "", ylab = "")
@@ -57,7 +62,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   set.seed(5)
   colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black")
   names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual")
-  dates <- seq(as.Date("2016-01-01"), as.Date("2020-02-01"), by = "week") ## TODO take dates from config file
+  dates <- seq(as.Date("2016-01-01"), projection_end, by = "week") ## TODO take dates from config file
   
   actual_episodes <- read.csv(actual_episodes_file, header = TRUE, 
                               stringsAsFactors = FALSE, na.strings ="NA") %>% 
