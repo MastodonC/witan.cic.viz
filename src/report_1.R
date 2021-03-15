@@ -3,6 +3,8 @@ library(lubridate)
 library(tidyquant)
 library(extrafont)
 library(beepr)
+library(ggthemes)
+source("src/process_counts.R")
 # loadfonts() # <- possibly not needed
 ### `font_import()` should be run initially to ensure required fonts are present
 
