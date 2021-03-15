@@ -13,6 +13,6 @@ process_counts <- function(file) {
     as.data.frame() %>%
     row_to_names(row_number = 1) %>% 
     rownames_to_column("date") %>%
-    mutate(date = str_replace(date, "Open ", "") %>% 
-             parse_date_time(orders = c("%d/%m/%y")))
+    mutate(date = str_replace(date, "Open ", "") %>%
+             dmy())
 }
