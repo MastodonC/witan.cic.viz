@@ -80,10 +80,6 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
     group_by(phase_id) %>% 
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
-  
-  if(!is.null(counts_file)) {
-    counts <- process_counts(counts_file)
-  }
 
   if(is.null(projected_episodes_file)) {
     projected_episodes <- NULL
@@ -113,20 +109,32 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   }
   
   actual_totals <- data.frame(date = c(), variable = c(), value = c())
-  for (date in dates) {
+  for (date in dates[dates < end_date]) {
     counts <- actual_episodes %>%
       filter(report_date <= date & (is.na(ceased) | ceased > date)) %>%
       summarise(n = n())
     actual_totals <- rbind(actual_totals, data.frame(date = c(as.Date(date)), variable = c("actual"), value = c(counts[[1]])))
   }
-  actual_totals$date <- ymd(actual_totals$date)
+  #actual_totals$date <- ymd(actual_totals$date)
+  
+  if(!is.null(counts_file)) {
+    counts <- process_counts(counts_file)
+    actual_totals <- bind_rows(actual_totals, counts %>% 
+                                 select(date, Total) %>% 
+                                 mutate(variable = "counts") %>% 
+                                 rename(value = Total) %>% 
+                                 mutate(value = as.numeric(as.character(value))))
+  } 
+  
   print(ggplot() +
-          geom_line(data = actual_totals, aes(x = date, y = value)) +
+          geom_line(data = actual_totals, aes(x = date, y = value, colour = variable)) +
           {if(!is.null(projected_episodes_file)) list(geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2),
-                                                     geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), 
-                                                                 fill = "gray", alpha = 0.3),
-                                                     geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), 
-                                                                 fill = "gray", alpha = 0.3))} +
+                                                      geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), 
+                                                                  fill = "gray", alpha = 0.3),
+                                                      geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), 
+                                                                  fill = "gray", alpha = 0.3))} +
+          geom_vline(xintercept = train_from, color = "black", linetype = 3, alpha = 0.5) +
+          geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
           scale_color_manual(values = colours) +
           labs(title = "CiC", x = "Date", y = "CiC"))
@@ -136,15 +144,15 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   
 }
 
+
+### Run section ###
+actual_episodes_file <- "/Users/Seb/code/witan.cic/data/scc/2021-03-11/suffolk-scrubbed-episodes-20210219.csv"
+projected_episodes_file <- "/Users/Seb/code/witan.cic/data/scc/2021-03-11/scc-episodes-2019-03-31-rewind-1yr-train-3yr-project-5yr-runs-100-seed-42-marginal-age-out.csv"
+counts_file <- '~/Downloads/2021-02-12 CiC Data for Chris Feb 20 sent.xlsx'
+output_file <- "report_1.pdf"
 pdf(output_file, paper = "a4r")
-report_1(actual_episodes_file, projected_episodes_file)
+report_1(actual_episodes_file, projected_episodes_file, counts_file)
 dev.off()
 embed_fonts(file = output_file, outfile = output_file)
-
-# actual_episodes_file <- "/Users/Seb/code/witan.cic/data/scc/2021-03-11/suffolk-scrubbed-episodes-20210219.csv"
-# projected_episodes_file <- "/Users/Seb/code/witan.cic/data/scc/2021-03-11/scc-episodes-2019-03-31-rewind-1yr-train-3yr-project-5yr-runs-100-seed-42-marginal-age-out.csv"
-# counts_file <- '~/Downloads/2021-02-12 CiC Data for Chris Feb 20 sent.xlsx'
-# output_file <- "report_1.pdf"
-
 # -5yrs, +3yrs from projection date
 # "joiner rate training period" added to legeend
