@@ -138,7 +138,10 @@ report_1(actual_episodes_file, projected_episodes_file)
 dev.off()
 embed_fonts(file = output_file, outfile = output_file)
 
-# actual_episodes_file <- '~/code/witan.cic/data/episodes.scrubbed.csv'
-# projected_episodes_file <- 'scc-episodes-2019-08-13-rewind-1yr-train-3yr-project-5yr-runs-100-seed-42-universe.csv'
-# output_file <- "out.pdf"
-# report_1('~/code/witan.cic/data/episodes.scrubbed.csv')
+# actual_episodes_file <- "/Users/Seb/code/witan.cic/data/scc/2021-03-11/suffolk-scrubbed-episodes-20210219.csv"
+# projected_episodes_file <- "/Users/Seb/code/witan.cic/data/scc/2021-03-11/scc-episodes-2019-03-31-rewind-1yr-train-3yr-project-5yr-runs-100-seed-42-marginal-age-out.csv"
+# counts_file <- '~/Downloads/2021-02-12 CiC Data for Chris Feb 20 sent.xlsx'
+# output_file <- "report_1.pdf"
+
+# -5yrs, +3yrs from projection date
+# "joiner rate training period" added to legeend
