@@ -146,7 +146,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           scale_color_manual(values = colours, 
                              limits=c("SSDA903", "MIS", "Projected Median", "Projected IQR", "95% Simulation Range")) +
           labs(title = "Total Children in Care", x = "Date", y = "No. children in care", 
-               colour = "Dataset", caption = "This is some caption text")
+               colour = "Dataset", caption = " e.g. timestamp of the chart being generated? name of LA? date of model run? version of model?")
         )
 
   beep()
