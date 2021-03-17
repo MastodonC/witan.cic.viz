@@ -102,7 +102,8 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
       quants <- quantile(counts_by_simulation$n, probs = c(0.05, 0.25, 0.5, 0.75, 0.975))
       projected_totals <- rbind(projected_totals, data.frame(date = c(as.Date(date)), lower.ci = c(quants[1]), 
                                                              q1 = c(quants[2]), median = c(quants[3]), 
-                                                             q3 = c(quants[4]), upper.ci = c(quants[5])))
+                                                             q3 = c(quants[4]), upper.ci = c(quants[5]),
+                                                             variable = c("Projected")))
     }
     projected_totals <- projected_totals %>%
       mutate(date = ymd(date)) %>% 
@@ -127,12 +128,16 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   } 
   
   print(ggplot() +
+          {if(!is.null(projected_episodes_file)) 
+            list(
+              geom_ribbon(data = projected_totals %>% mutate(variable = "Interquartile Range"), 
+                          aes(x = date, ymin = q1, ymax = q3, colour = variable), linetype = 0, alpha = 0.4, show.legend = FALSE),
+              geom_ribbon(data = projected_totals %>% mutate(variable = "Confidence Interval"), 
+                          aes(x = date, ymin = lower.ci, ymax = upper.ci, colour = variable), linetype = 0, alpha = 0.2, show.legend = FALSE),
+              geom_line(data = projected_totals, 
+                        aes(x = date, y = median, colour = variable), 
+                        linetype = 2))} +
           geom_line(data = actual_totals, aes(x = date, y = value, colour = variable)) +
-          {if(!is.null(projected_episodes_file)) list(geom_line(data = projected_totals, aes(x = date, y = median), linetype = 2),
-                                                      geom_ribbon(data = projected_totals, aes(x = date, ymin = lower.ci, ymax = upper.ci), 
-                                                                  fill = "gray", alpha = 0.3),
-                                                      geom_ribbon(data = projected_totals, aes(x = date, ymin = q1, ymax = q3), 
-                                                                  fill = "gray", alpha = 0.3))} +
           geom_vline(xintercept = train_from, color = "black", linetype = 3, alpha = 0.5) +
           geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
