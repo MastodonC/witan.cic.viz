@@ -62,8 +62,8 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   text(5, 6, "\"LA\" CiC Projection", cex=2.5) ## TODO take LA name from config
   
   set.seed(5)
-  colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black", "#F28E2B")
-  names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "actual", "counts")
+  colours <- c("#4E79A7", "#F28E2B", "grey", "#F28E2B", "#4E79A7", "black", "blue")
+  names(colours) <- c("lower.ci", "q1", "median", "q3", "upper.ci", "SSDA903", "MIS")
   dates <- seq(as.Date("2016-01-01"), projection_end, by = "week") ## TODO take dates from config file
   tableau_color_pal("Tableau 20")(20)
   
@@ -113,15 +113,14 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
     counts <- actual_episodes %>%
       filter(report_date <= date & (is.na(ceased) | ceased > date)) %>%
       summarise(n = n())
-    actual_totals <- rbind(actual_totals, data.frame(date = c(as.Date(date)), variable = c("actual"), value = c(counts[[1]])))
+    actual_totals <- rbind(actual_totals, data.frame(date = c(as.Date(date)), variable = c("SSDA903"), value = c(counts[[1]])))
   }
-  #actual_totals$date <- ymd(actual_totals$date)
-  
+
   if(!is.null(counts_file)) {
     counts <- process_counts(counts_file)
     actual_totals <- bind_rows(actual_totals, counts %>% 
                                  select(date, Total) %>% 
-                                 mutate(variable = "counts") %>% 
+                                 mutate(variable = "MIS") %>% 
                                  rename(value = Total) %>% 
                                  mutate(value = as.numeric(as.character(value))))
   } 
@@ -137,8 +136,8 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
           scale_color_manual(values = colours) +
-          labs(title = "CiC", x = "Date", y = "CiC"))
-  
+          labs(title = "CiC", x = "Date", y = "No. children in care", colour = "Dataset")
+        )
 
   beep()
   
