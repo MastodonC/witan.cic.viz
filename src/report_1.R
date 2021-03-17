@@ -136,7 +136,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
           scale_color_manual(values = colours) +
-          labs(title = "CiC", x = "Date", y = "No. children in care", colour = "Dataset")
+          labs(title = "Total Children in Care", x = "Date", y = "No. children in care", colour = "Dataset")
         )
 
   beep()
