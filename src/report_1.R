@@ -141,7 +141,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           geom_vline(xintercept = train_from, color = "black", linetype = 3, alpha = 0.5) +
           geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
-          scale_color_manual(values = colours) +
+          scale_color_manual(values = colours, limits=c("SSDA903", "MIS", "Projected", "Interquartile Range", "Confidence Interval")) +
           labs(title = "Total Children in Care", x = "Date", y = "No. children in care", 
                colour = "Dataset", caption = "This is some caption text")
         )
