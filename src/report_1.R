@@ -39,6 +39,7 @@ year_diff <- function(start, stop) {
 theme_mastodon <- theme(plot.title = element_text(
   hjust = 0.5, size = 20,
   margin = margin(0,0,15,0)),
+  plot.caption = element_text(hjust = 0.5),
   axis.title = element_text(
     hjust = 0.5, size = 16),
   axis.text = element_text(
@@ -136,7 +137,8 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
           scale_color_manual(values = colours) +
-          labs(title = "Total Children in Care", x = "Date", y = "No. children in care", colour = "Dataset")
+          labs(title = "Total Children in Care", x = "Date", y = "No. children in care", 
+               colour = "Dataset", caption = "This is some caption text")
         )
 
   beep()
