@@ -52,7 +52,7 @@ theme_mastodon <- theme(plot.title = element_text(
   panel.background = element_rect(fill = "white",
                                   colour = "black"))
 
-project_from <- as.Date("2020-03-31")
+project_from <- as.Date("2020-03-31") ## magic date, to be pulled from model config
 project_yrs <- 4
 train_from <- project_from - years(3)
 projection_end <- project_from + years(project_yrs)
