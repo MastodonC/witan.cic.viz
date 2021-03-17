@@ -84,7 +84,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
     mutate(admission_age = year_diff(min(birthday), min(report_date))) %>% 
     ungroup
 
-  if(is.null(projected_episodes_file)) {
+  if (is.null(projected_episodes_file)) {
     projected_episodes <- NULL
   } else {
     projected_episodes <- read.csv(projected_episodes_file, header = TRUE, stringsAsFactors = FALSE, na.strings ="") %>%
@@ -95,7 +95,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   
   ### Total in CiC
   projected_totals <- data.frame(date = c(), lower.ci = c(), q1 = c(), median = c(), q3 = c(), upper.ci = c())
-  if(!is.null(projected_episodes_file)) {
+  if (!is.null(projected_episodes_file)) {
     for (date in dates) {
       counts_by_simulation <- projected_episodes %>%
         filter(Start <= date & (is.na(End) | End >= date)) %>%
@@ -120,7 +120,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
     actual_totals <- rbind(actual_totals, data.frame(date = c(as.Date(date)), variable = c("SSDA903"), value = c(counts[[1]])))
   }
 
-  if(!is.null(counts_file)) {
+  if (!is.null(counts_file)) {
     counts <- process_counts(counts_file)
     actual_totals <- bind_rows(actual_totals, counts %>% 
                                  select(date, Total) %>% 
@@ -130,7 +130,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   } 
   
   print(ggplot() +
-          {if(!is.null(projected_episodes_file)) 
+          {if (!is.null(projected_episodes_file)) 
             list(
               geom_ribbon(data = projected_totals %>% mutate(variable = "Projected IQR"), 
                           aes(x = date, ymin = q1, ymax = q3, colour = variable), 
