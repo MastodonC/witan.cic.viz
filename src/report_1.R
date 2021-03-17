@@ -133,9 +133,11 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           {if(!is.null(projected_episodes_file)) 
             list(
               geom_ribbon(data = projected_totals %>% mutate(variable = "Projected IQR"), 
-                          aes(x = date, ymin = q1, ymax = q3, colour = variable), linetype = 0, alpha = 0.4, show.legend = FALSE),
+                          aes(x = date, ymin = q1, ymax = q3, colour = variable), 
+                          linetype = 0, alpha = 0.4, show.legend = FALSE),
               geom_ribbon(data = projected_totals %>% mutate(variable = "95% Simulation Range"), 
-                          aes(x = date, ymin = lower.ci, ymax = upper.ci, colour = variable), linetype = 0, alpha = 0.2, show.legend = FALSE),
+                          aes(x = date, ymin = lower.ci, ymax = upper.ci, colour = variable), 
+                          linetype = 0, alpha = 0.2, show.legend = FALSE),
               geom_line(data = projected_totals, 
                         aes(x = date, y = median, colour = variable), 
                         linetype = 2))} +
@@ -145,8 +147,8 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           theme_mastodon +
           scale_color_manual(values = colours, 
                              limits=c("SSDA903", "MIS", "Projected Median", "Projected IQR", "95% Simulation Range")) +
-          labs(title = "Total Children in Care", x = "Date", y = "No. children in care", 
-               colour = "Dataset", caption = " e.g. timestamp of the chart being generated? name of LA? date of model run? version of model?")
+          labs(title = "Total Children in Care", x = "Date", y = "No. children in care", colour = "Dataset", 
+               caption = " e.g. timestamp of the chart being generated? name of LA? date of model run? version of model?")
         )
 
   beep()
