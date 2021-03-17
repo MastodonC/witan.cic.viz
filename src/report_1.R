@@ -64,7 +64,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   
   set.seed(5)
   colours <- c("gray", "#778899", "gray", "black", "blue")
-  names(colours) <- c("Confidence Interval", "Interquartile Range", "Projected", "SSDA903", "MIS")
+  names(colours) <- c("95% Simulation Range", "Projected IQR", "Projected Median", "SSDA903", "MIS")
   dates <- seq(as.Date("2016-01-01"), projection_end, by = "week") ## TODO take dates from config file
   tableau_color_pal("Tableau 20")(20)
   
@@ -103,7 +103,7 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
       projected_totals <- rbind(projected_totals, data.frame(date = c(as.Date(date)), lower.ci = c(quants[1]), 
                                                              q1 = c(quants[2]), median = c(quants[3]), 
                                                              q3 = c(quants[4]), upper.ci = c(quants[5]),
-                                                             variable = c("Projected")))
+                                                             variable = c("Projected Median")))
     }
     projected_totals <- projected_totals %>%
       mutate(date = ymd(date)) %>% 
@@ -130,9 +130,9 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
   print(ggplot() +
           {if(!is.null(projected_episodes_file)) 
             list(
-              geom_ribbon(data = projected_totals %>% mutate(variable = "Interquartile Range"), 
+              geom_ribbon(data = projected_totals %>% mutate(variable = "Projected IQR"), 
                           aes(x = date, ymin = q1, ymax = q3, colour = variable), linetype = 0, alpha = 0.4, show.legend = FALSE),
-              geom_ribbon(data = projected_totals %>% mutate(variable = "Confidence Interval"), 
+              geom_ribbon(data = projected_totals %>% mutate(variable = "95% Simulation Range"), 
                           aes(x = date, ymin = lower.ci, ymax = upper.ci, colour = variable), linetype = 0, alpha = 0.2, show.legend = FALSE),
               geom_line(data = projected_totals, 
                         aes(x = date, y = median, colour = variable), 
@@ -141,7 +141,8 @@ report_1 <- function(actual_episodes_file, projected_episodes_file = NULL, count
           geom_vline(xintercept = train_from, color = "black", linetype = 3, alpha = 0.5) +
           geom_vline(xintercept = project_from, color = "black", linetype = 3, alpha = 0.5) +
           theme_mastodon +
-          scale_color_manual(values = colours, limits=c("SSDA903", "MIS", "Projected", "Interquartile Range", "Confidence Interval")) +
+          scale_color_manual(values = colours, 
+                             limits=c("SSDA903", "MIS", "Projected Median", "Projected IQR", "95% Simulation Range")) +
           labs(title = "Total Children in Care", x = "Date", y = "No. children in care", 
                colour = "Dataset", caption = "This is some caption text")
         )
