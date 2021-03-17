@@ -48,7 +48,9 @@ theme_mastodon <- theme(plot.title = element_text(
   axis.title.x = element_text(margin = margin(15,0,0,0)),
   axis.title.y = element_text(margin = margin(0,10,0,0)),
   plot.margin = margin(10,20,10,10),
-  panel.grid = element_line(color = "#eeeeee"))
+  panel.grid = element_line(color = "#eeeeee"),
+  panel.background = element_rect(fill = "white",
+                                  colour = "black"))
 
 project_from <- as.Date("2020-03-31")
 project_yrs <- 4
