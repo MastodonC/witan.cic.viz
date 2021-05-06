@@ -9,18 +9,22 @@ library(ggthemes)
 library(tidyquant)
 source("src/helpers.R")
 
-episodes_csv <- "historic-episodes.csv"
-simulated_episodes_csv <- "projection-episodes.csv"
-output_csv <- "lattice-summary.csv"
-output_pdf <- "lattice-summary.pdf"
+input_dir <- ''
+output_dir <- ''
+
+historic_episodes_file <- "historic-episodes.csv"
+projection_episodes_file <- "projection-episodes.csv"
+lattice_csv <- "lattice-summary.csv"
+lattice_pdf <- "lattice-summary.pdf"
 
 min_chart_date <- as.Date("2014-03-01")
 extract_date <- as.Date("2020-03-31")
+projection_start_date <- as.Date("2019-03-31")
 max_chart_date <- as.Date("2024-03-01")
 
 label_levels <- c("joiners", "agedin", "net", "agedout", "leavers", "cic")
 
-bootstrapped_actuals <- read.csv(episodes_csv) %>%
+bootstrapped_actuals <- read.csv(file.path(input_dir, historic_episodes_file)) %>%
   filter(Episode == 1 & Provenance != "S") %>%
   dplyr::mutate(period_id = ID, period_start = ymd(Period.Start), period_end = ymd(Period.End), birthday = ymd(Birthday), provenance = Provenance, simulation = Simulation) %>%
   dplyr::select(period_id, simulation, period_start, period_end, birthday, provenance)
@@ -81,7 +85,7 @@ grouped_ledger$label <- factor(grouped_ledger$label, levels = label_levels)
 
 ## Simulated episodes
 
-simulated_episodes <- read.csv(simulated_episodes_csv) %>%
+simulated_episodes <- read.csv(file.path(input_dir, projection_episodes_file)) %>%
   filter(Episode == 1) %>%
   dplyr::mutate(period_id = ID, period_start = ymd(Period.Start), period_end = ymd(Period.End), birthday = ymd(Birthday), provenance = Provenance, simulation = Simulation) %>%
   dplyr::select(period_id, simulation, period_start, period_end, birthday, provenance)
@@ -175,7 +179,7 @@ state_labels <- c(
   'cic' = 'CiC'
 )
 
-pdf(output_pdf)
+pdf(file.path(output_dir, lattice_pdf))
 
 colours <- tableau_color_pal("Tableau 20")(10)
 names(colours) <- c("joiners", "joiners simulated",
@@ -228,7 +232,7 @@ for (category in age_categories) {
                 aes(group_date, median, colour = label), linetype = 3) +
       geom_line(data = grouped_ledger %>% filter(age_group == category, group_date >= as.Date("2016-01-01") & group_date <= extract_date),
                 aes(group_date, n, group = simulation, colour = label),
-                stat = "identity", alpha = 0.1) +
+                stat = "identity", alpha = 1) +
       geom_line(data = in_cic_simulated %>% filter(group_date >= as.Date("2016-01-01") & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, median), linetype = 3) +
       geom_ribbon(data = in_cic_simulated %>% filter(group_date >= as.Date("2016-01-01") & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, ymin = lower_95, ymax = upper_95), alpha = 0.2) +
       geom_ribbon(data = in_cic_simulated %>% filter(group_date >= as.Date("2016-01-01") & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, ymin = lower_50, ymax = upper_50), alpha = 0.2) +
@@ -244,7 +248,7 @@ for (category in age_categories) {
 dev.off()
 
 rbind(simulated_grouped_ledger %>%
-        filter(group_date > extract_date & group_date <= as.Date("2022-01-01")) %>%
+        filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
         rename(month = group_date, metric = label) %>%
         mutate(source = "projection") %>%
         group_by(month, age_group, metric, source) %>%
@@ -261,10 +265,10 @@ rbind(simulated_grouped_ledger %>%
         mutate(metric = "cic", source = "SSDA903") %>%
         dplyr::select(month, age_group, metric, source, lower_95, lower_50, median, upper_50, upper_95),
       in_cic_simulated %>%
-        filter(group_date > extract_date & group_date <= as.Date("2022-01-01")) %>%
+        filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
         rename(month = group_date) %>%
         mutate(metric = "cic", source = "projection") %>%
         dplyr::select(month, age_group, metric, source, lower_95, lower_50, median, upper_50, upper_95)
 ) %>%
-  write.csv(file = output_csv, row.names = FALSE)
+  write.csv(file = file.path(output_dir, lattice_csv), row.names = FALSE)
 
