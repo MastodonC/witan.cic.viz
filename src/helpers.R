@@ -183,14 +183,18 @@ survival_data4 <- function(survival_data3) {
 
 age_categories <- c("Age 0", "Age 1-5", "Age 6-10", "Age 11-15", "Age 16", "Age 17")
 
-age_category <- function(age) {
-  case_when(age == 0 ~ age_categories[1],
-            age %in% 1:5 ~ age_categories[2],
-            age %in% 6:10 ~ age_categories[3],
-            age %in% 11:15 ~ age_categories[4],
-            age == 16 ~ age_categories[5],
-            age %in% 17:18 ~ age_categories[6],
-            TRUE ~ "Other")
+age_category <- function(age, group = TRUE) {
+  if (group) {
+    case_when(age == 0 ~ age_categories[1],
+              age %in% 1:5 ~ age_categories[2],
+              age %in% 6:10 ~ age_categories[3],
+              age %in% 11:15 ~ age_categories[4],
+              age == 16 ~ age_categories[5],
+              age %in% 17:18 ~ age_categories[6],
+              TRUE ~ "Other")
+  } else {
+    paste("Age", age)
+  }
 }
 
 labelled_episodes <- function(periods, date_range) {

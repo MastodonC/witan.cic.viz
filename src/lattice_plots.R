@@ -15,13 +15,17 @@ output_dir <- ''
 historic_episodes_file <- "historic-episodes.csv"
 projection_episodes_file <- "projection-episodes.csv"
 lattice_by_age_csv <- "lattice-by-age-group.csv"
+lattice_by_age_simulation_csv <- "lattice-by-age-group-simulation.csv"
 lattice_top_line_csv <- "lattice-top-line.csv"
 lattice_pdf <- "lattice-plots.pdf"
+joiner_rates_pdf <- 'joiner-rates.pdf'
+joiner_rates_csv <- 'joiner-rates.csv'
 
 min_chart_date <- as.Date("2014-03-01")
 extract_date <- as.Date("2020-03-31")
 projection_start_date <- as.Date("2019-03-31")
 max_chart_date <- as.Date("2024-03-01")
+group_ages <- FALSE
 
 label_levels <- c("joiners", "agedin", "net", "agedout", "leavers", "cic")
 
@@ -44,25 +48,25 @@ ledger <- rbind(
   bootstrapped_actuals %>%
     dplyr::group_by(period_id, simulation) %>%
     dplyr::summarise(date = min(period_start), birthday = birthday[1], .groups = "drop") %>%
-    dplyr::mutate(age_group = age_category(year_diff(birthday, date))) %>%
+    dplyr::mutate(age_group = age_category(year_diff(birthday, date), group_ages)) %>%
     dplyr::select(date, simulation, age_group) %>%
     dplyr::mutate(label = "joiners"),
   bootstrapped_actuals %>%
     dplyr::group_by(period_id, simulation) %>%
     dplyr::summarise(date = max(period_end), birthday = birthday[1], .groups = "drop") %>%
-    dplyr::mutate(age_group = age_category(year_diff(birthday, date))) %>%
+    dplyr::mutate(age_group = age_category(year_diff(birthday, date), group_ages)) %>%
     dplyr::select(date, simulation, age_group) %>%
     dplyr::mutate(label = "leavers"),
   migrations %>%
-    dplyr::mutate(category_before = age_category(age_before),
-                  category_after = age_category(age_after)) %>%
+    dplyr::mutate(category_before = age_category(age_before, group_ages),
+                  category_after = age_category(age_after, group_ages)) %>%
     dplyr::filter(category_before != category_after) %>%
     dplyr::rename(date = anniversary, age_group = category_after) %>%
     dplyr::select(date, simulation, age_group) %>%
     dplyr::mutate(label = "agedin"),
   migrations %>%
-    dplyr::mutate(category_before = age_category(age_before),
-                  category_after = age_category(age_after)) %>%
+    dplyr::mutate(category_before = age_category(age_before, group_ages),
+                  category_after = age_category(age_after, group_ages)) %>%
     dplyr::filter(category_before != category_after) %>%
     dplyr::rename(date = anniversary, age_group = category_before) %>%
     dplyr::select(date, simulation, age_group) %>%
@@ -104,25 +108,25 @@ simulated_ledger <- rbind(
   simulated_episodes %>%
     dplyr::group_by(period_id, simulation) %>%
     dplyr::summarise(date = min(period_start), birthday = birthday[1], .groups = "drop") %>%
-    dplyr::mutate(age_group = age_category(year_diff(birthday, date))) %>%
+    dplyr::mutate(age_group = age_category(year_diff(birthday, date), group_ages)) %>%
     dplyr::select(date, simulation, age_group) %>%
     dplyr::mutate(label = "joiners"),
   simulated_episodes %>%
     dplyr::group_by(period_id, simulation) %>%
     dplyr::summarise(date = max(period_end), birthday = birthday[1], .groups = "drop") %>%
-    dplyr::mutate(age_group = age_category(year_diff(birthday, date))) %>%
+    dplyr::mutate(age_group = age_category(year_diff(birthday, date), group_ages)) %>%
     dplyr::select(date, simulation, age_group) %>%
     dplyr::mutate(label = "leavers"),
   simulated_migrations %>%
-    dplyr::mutate(category_before = age_category(age_before),
-                  category_after = age_category(age_after)) %>%
+    dplyr::mutate(category_before = age_category(age_before, group_ages),
+                  category_after = age_category(age_after, group_ages)) %>%
     dplyr::filter(category_before != category_after) %>%
     dplyr::rename(date = anniversary, age_group = category_after) %>%
     dplyr::select(date, simulation, age_group) %>%
     dplyr::mutate(label = "agedin"),
   simulated_migrations %>%
-    dplyr::mutate(category_before = age_category(age_before),
-                  category_after = age_category(age_after)) %>%
+    dplyr::mutate(category_before = age_category(age_before, group_ages),
+                  category_after = age_category(age_after, group_ages)) %>%
     dplyr::filter(category_before != category_after) %>%
     dplyr::rename(date = anniversary, age_group = category_before) %>%
     dplyr::select(date, simulation, age_group) %>%
@@ -154,7 +158,7 @@ simulated_ci <- simulated_grouped_ledger %>%
 in_cic_actuals <- bootstrapped_actuals %>%
   inner_join(data.frame(group_date = seq(min_chart_date, extract_date, by = "month")), by = character()) %>%
   filter(period_start <= group_date & period_end >= group_date) %>%
-  mutate(age_group = age_category(year_diff(birthday, group_date))) %>%
+  mutate(age_group = age_category(year_diff(birthday, group_date), group_ages)) %>%
   group_by(group_date, age_group, simulation) %>%
   summarise(n = n_distinct(period_id))
 
@@ -165,7 +169,7 @@ in_cic_actuals_ci <- in_cic_actuals %>%
 in_cic_simulated <- simulated_episodes %>%
   inner_join(data.frame(group_date = seq(extract_date - years(1), max_chart_date, by = "month")), by = character()) %>%
   filter(period_start <= group_date & period_end >= group_date) %>%
-  mutate(age_group = age_category(year_diff(birthday, group_date))) %>%
+  mutate(age_group = age_category(year_diff(birthday, group_date), group_ages)) %>%
   group_by(group_date, age_group, simulation) %>%
   summarise(n = n_distinct(period_id)) 
 
@@ -182,6 +186,65 @@ state_labels <- c(
   'cic' = 'CiC'
 )
 
+rbind(simulated_grouped_ledger %>%
+  filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
+  rename(month = group_date, metric = label) %>%
+  mutate(source = "projection") %>%
+  dcast(month + age_group + metric + source ~ simulation, value.var = "n", fill = 0),
+grouped_ledger %>%
+  filter(group_date >= as.Date("2014-01-01") & group_date <= extract_date) %>%
+  rename(month = group_date, metric = label) %>%
+  mutate(source = "SSDA903") %>%
+  select(-simulation) %>%
+  inner_join(data.frame(simulation = 1:100), by = character()) %>%
+  dcast(month + age_group + metric + source ~ simulation, value.var = "n", fill = 0),
+in_cic_simulated %>%
+  filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
+  rename(month = group_date) %>%
+  mutate(metric = "cic", source = "projection") %>%
+  dcast(month + age_group + metric + source ~ simulation, value.var = "n", fill = 0),
+in_cic_actuals %>%
+  filter(group_date >= as.Date("2014-01-01") & group_date <= extract_date) %>%
+  rename(month = group_date) %>%
+  mutate(metric = "cic", source = "SSDA903") %>%
+  select(-simulation) %>%
+  inner_join(data.frame(simulation = 1:100), by = character()) %>%
+  dcast(month + age_group + metric + source ~ simulation, value.var = "n", fill = 0)) %>%
+  write.csv(file = file.path(output_dir, lattice_by_age_simulation_csv), row.names = FALSE)
+
+pdf(filename = file.path(output_dir, joiner_rates_pdf))
+
+print(simulated_grouped_ledger %>%
+  mutate(age_group = factor(age_group, levels = paste("Age", 0:17))) %>%
+  filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
+  rename(month = group_date, metric = label) %>%
+  filter(metric == "joiners") %>%
+  dcast(month + age_group ~ simulation, value.var = "n", fill = 0) %>%
+  melt(id.vars = c("month", "age_group"), variable.name = "simulation", value.name = "n") %>%
+  dplyr::select(age_group, simulation, n) %>%
+  group_by(age_group)%>%
+  mutate(age_mean = mean(n)) %>%
+  group_by(age_group, age_mean, n) %>%
+  summarise(count = n())%>%
+  ungroup %>%
+  ggplot(aes(n, count))+
+  geom_bar(stat = "identity") +
+  geom_vline(aes(xintercept = age_mean), colour = "orange", linetype = 2) +
+  facet_wrap(vars(age_group), scales = "free"))
+
+dev.off()
+
+simulated_grouped_ledger %>%
+  mutate(age_group = factor(age_group, levels = paste("Age", 0:17))) %>%
+  filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
+  rename(month = group_date, metric = label) %>%
+  filter(metric == "joiners") %>%
+  dcast(month + age_group ~ simulation, value.var = "n", fill = 0) %>%
+  melt(id.vars = c("month", "age_group"), variable.name = "simulation", value.name = "n") %>%
+  dplyr::select(age_group, simulation, n) %>%
+  group_by(age_group) %>%
+  summarise(age_mean = mean(n)) %>%
+  write.csv(file = file.path(output_dir, joiner_rates_csv), row.names = FALSE)
 
 rbind(simulated_grouped_ledger %>%
         filter(group_date > projection_start_date & group_date <= as.Date("2022-01-01")) %>%
@@ -209,7 +272,8 @@ rbind(simulated_grouped_ledger %>%
   write.csv(file = file.path(output_dir, lattice_by_age_csv), row.names = FALSE)
 
 
-pdf(file.path(output_dir, lattice_pdf))
+pdf(file = file.path(output_dir, lattice_pdf))
+
 
 colours <- tableau_color_pal("Tableau 20")(10)
 names(colours) <- c("joiners", "joiners simulated",
@@ -251,7 +315,9 @@ names(colours) <- c("joiners", "joiners simulated",
 #   )
 # }
 
-for (category in age_categories) {
+categories <- if(group_ages) { age_categories}else {age_labels}
+
+for (category in categories) {
   print(
     ggplot() +
       geom_ribbon(data = simulated_ci %>% filter(group_date >= as.Date("2016-01-01") & group_date <= max_chart_date & age_group == category),
@@ -278,7 +344,6 @@ for (category in age_categories) {
 ## Same but for all cic
 
 label_levels <- c("joiners", "net", "leavers", "cic")
-
 
 ledger <- rbind(
   bootstrapped_actuals %>%
