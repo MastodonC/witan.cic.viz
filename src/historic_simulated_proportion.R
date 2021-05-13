@@ -10,7 +10,7 @@ historic_simulated_proportion <- function(input_dir, output_dir, historic_start,
     dplyr::select(ID, simulation, period_start, period_end, birthday, provenance)
   
   n_cic <- data.frame(date = seq(historic_start, projection_end, by = "month")) %>%
-    inner_join(projected_periods_qwhjd, by = character()) %>%
+    inner_join(projected_periods, by = character()) %>%
     filter(period_start <= date & period_end >= date) %>%
     mutate(provenance = if_else(provenance == "S", "Simulated joiners", "Historic joiners")) %>%
     group_by(simulation, date, provenance) %>%
