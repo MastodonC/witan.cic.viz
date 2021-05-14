@@ -2,7 +2,7 @@ library(dplyr)
 library(ggplot2)
 
 # Projection date is the date from which we start tracking simulated joiners
-historic_simulated_proportion <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, max_y) {
+generate_historic_simulated_area_plot <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, max_y) {
   projection_episodes <- file.path(input_dir, "projection-episodes.csv")
   projected_periods <- read.csv(projection_episodes) %>%
     filter(Episode == 1) %>%
@@ -67,5 +67,5 @@ historic_simulated_proportion <- function(input_dir, output_dir, historic_start,
     write.csv(file = file.path(output_dir, "historic-simulated-proportion.csv"), row.names = FALSE)
 }
 
-# historic_simulated_proportion("/Users/henry/Mastodon C/witan.cic/data/scc/2021-04-08/trended", "/Users/henry/Mastodon C/witan.cic/data/scc/2021-04-08/trended",
-#                               as.Date("2015-01-01"), as.Date("2020-03-31"), as.Date("2019-03-31"), as.Date("2024-03-31"), 1300)
+# generate_historic_simulated_area_plot("/Users/henry/Mastodon C/witan.cic/data/scc/2021-04-08/trended", "/Users/henry/Mastodon C/witan.cic/data/scc/2021-04-08/trended",
+#                                       as.Date("2015-01-01"), as.Date("2020-03-31"), as.Date("2019-03-31"), as.Date("2024-03-31"), 1300)
