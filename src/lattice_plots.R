@@ -6,7 +6,7 @@ library(ggthemes)
 library(tidyquant)
 source("src/helpers.R")
 
-generate_lattice_plots <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, group_age = FALSE) {
+generate_lattice_plots <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, group_ages = FALSE) {
 
   historic_episodes_file <- "historic-episodes.csv"
   projection_episodes_file <- "projection-episodes.csv"
@@ -271,8 +271,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   categories <- if(group_ages) { age_categories}else {age_labels}
 
   for (category in categories) {
-    print(
-      ggplot() +
+    print(ggplot() +
         geom_ribbon(data = simulated_ci %>% filter(group_date >= projection_start & group_date <= projection_end & age_group == category),
                     aes(group_date, ymin = lower_95, ymax = upper_95, fill = label), alpha = 0.2) +
         geom_ribbon(data = simulated_ci %>% filter(group_date >= projection_start & group_date <= projection_end & age_group == category),
@@ -282,7 +281,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         geom_line(data = grouped_ledger %>% filter(age_group == category & group_date >= projection_start & group_date <= historic_end),
                   aes(group_date, n, group = simulation, colour = label),
                   stat = "identity", alpha = 1) +
-        geom_line(data = in_cic_simulated_ci %>% filter(group_date >= projection_start) & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, median), linetype = 3) +
+        geom_line(data = in_cic_simulated_ci %>% filter(group_date >= projection_start & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, median), linetype = 3) +
         geom_ribbon(data = in_cic_simulated_ci %>% filter(group_date >= projection_start & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, ymin = lower_95, ymax = upper_95), alpha = 0.2) +
         geom_ribbon(data = in_cic_simulated_ci %>% filter(group_date >= projection_start & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, ymin = lower_50, ymax = upper_50), alpha = 0.2) +
         geom_line(data = in_cic_actuals_ci %>% filter(group_date >= projection_start & age_group == category) %>% mutate(label = factor("cic", levels = label_levels)), aes(group_date, median)) +
@@ -290,9 +289,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         scale_colour_manual(values = colours) +
         scale_fill_manual(values = colours) +
         theme(legend.position = "none") +
-        labs(x = "Date", y = "Children")
-    )
-  }
+        labs(x = "Date", y = "Children"))
+    }
 
   ## Same but for all cic
 
