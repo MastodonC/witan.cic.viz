@@ -181,6 +181,8 @@ survival_data4 <- function(survival_data3) {
            fuzzed_exit_age = fuzzed_duration + day_diff(birthday, period_start))
 }
 
+age_labels <- paste("Age", 0:17)
+
 age_categories <- c("Age 0", "Age 1-5", "Age 6-10", "Age 11-15", "Age 16", "Age 17")
 
 age_category <- function(age, group = TRUE) {
