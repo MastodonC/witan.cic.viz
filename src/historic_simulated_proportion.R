@@ -17,44 +17,48 @@ generate_historic_simulated_area_plot <- function(input_dir, output_dir, histori
     summarise(n_cic = n()) %>%
     mutate(provenance = factor(provenance, levels = c("Simulated joiners", "Historic joiners")))
   
+  n_cic <- n_cic %>%
+    inner_join(grid_x_labels)
+  
   ggplot() +
-    geom_area(data = n_cic %>% group_by(date, provenance) %>%
+    geom_area(data = n_cic %>% group_by(label, date, provenance) %>%
                 summarise(median = median(n_cic)),
               aes(date, median, fill = provenance),
               position = "stack") +
     geom_ribbon(data = n_cic %>%
                   filter(provenance == "Historic joiners") %>%
-                  group_by(date) %>%
+                  group_by(label, date) %>%
                   summarise(lower_95 = quantile(n_cic, 0.0275),
                             upper_95 = quantile(n_cic, 0.975)),
                 aes(x = date, ymin = lower_95, ymax = upper_95), fill = "black", alpha = 0.2) +
     geom_ribbon(data = n_cic %>%
                   filter(provenance == "Historic joiners") %>%
-                  group_by(date) %>%
+                  group_by(label, date) %>%
                   summarise(lower_95 = quantile(n_cic, 0.25),
                             upper_95 = quantile(n_cic, 0.75)),
                 aes(x = date, ymin = lower_95, ymax = upper_95), fill = "black", alpha = 0.2) +
     geom_ribbon(data = n_cic %>%
-                  group_by(date, simulation) %>%
+                  group_by(label, date, simulation) %>%
                   summarise(n_cic = sum(n_cic)) %>%
                   summarise(lower_95 = quantile(n_cic, 0.0275),
                             upper_95 = quantile(n_cic, 0.975)),
                 aes(x = date, ymin = lower_95, ymax = upper_95), fill = "black", alpha = 0.2) +
     geom_ribbon(data = n_cic %>%
-                  group_by(date, simulation) %>%
+                  group_by(label, date, simulation) %>%
                   summarise(n_cic = sum(n_cic)) %>%
                   summarise(lower_95 = quantile(n_cic, 0.25),
                             upper_95 = quantile(n_cic, 0.75)),
                 aes(x = date, ymin = lower_95, ymax = upper_95), fill = "black", alpha = 0.2) +
     geom_line(data = n_cic %>%
-                group_by(date, simulation) %>%
+                group_by(label, date, simulation) %>%
                 filter(date >= projection_start) %>%
                 summarise(n_cic = sum(n_cic)) %>%
                 summarise(y = median(n_cic)),
               aes(x = date, y = y), colour = "black", linetype = 2, alpha = 0.5) +
     scale_fill_manual(values = tableau_color_pal("Tableau 20")(4)[c(3,1)]) +
     labs(y = "CiC", x = "Date", fill = "Joiners") +
-    ylim(c(0, max_y))
+    ylim(c(0, max_y)) +
+    facet_grid(cols = vars(label))
   ggsave(file.path(output_dir, "historic-simulated-proportion.png"), width = 8, height = 5)
   
   n_cic %>%
@@ -66,6 +70,14 @@ generate_historic_simulated_area_plot <- function(input_dir, output_dir, histori
               upper_95 = quantile(n_cic, 0.975)) %>%
     write.csv(file = file.path(output_dir, "historic-simulated-proportion.csv"), row.names = FALSE)
 }
+
+input_dir <- '/Users/henry/Mastodon C/witan.cic/data/scc/2021-06-02/scenario/outputs'
+output_dir <- '/Users/henry/Mastodon C/witan.cic/data/scc/2021-06-02/scenario/outputs'
+historic_start <- as.Date("2014-03-01")
+historic_end <-  as.Date("2020-03-31")
+projection_start <- as.Date("2019-03-31")
+projection_end <- as.Date("2024-03-01")
+max_y <- 1300
 
 # generate_historic_simulated_area_plot("/Users/henry/Mastodon C/witan.cic/data/scc/2021-04-08/trended", "/Users/henry/Mastodon C/witan.cic/data/scc/2021-04-08/trended",
 #                                       as.Date("2015-01-01"), as.Date("2020-03-31"), as.Date("2019-03-31"), as.Date("2024-03-31"), 1300)
