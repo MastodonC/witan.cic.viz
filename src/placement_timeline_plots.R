@@ -10,6 +10,7 @@ placement_timeline_plots <- function(input_dir, output_dir) {
   
   historic_episodes_file <- "historic-episodes.csv"
   projection_episodes_file <- "projection-episodes.csv"
+  timeline_plot_pdf <- "timeline-plot.pdf"
   
   projected_episodes <- read.csv(file.path(input_dir, projection_episodes_file)) %>%
     filter(Provenance != "S" & Simulation == 1) %>%
@@ -19,7 +20,7 @@ placement_timeline_plots <- function(input_dir, output_dir) {
     dplyr::select(period_id, simulation, episode, period_start, period_end, start, end, birthday, provenance, placement)
   
   weekly_placements <- projected_episodes %>%
-    dplyr::inner_join(data.frame(week = floor_date(seq(historic_start, historic_end, by = "week"), unit = "week")), by = character()) %>%
+    dplyr::inner_join(data.frame(week = floor_date(seq(min(projected_episodes$start), max(projected_episodes$end, na.rm = TRUE), by = "week"), unit = "week")), by = character()) %>%
     dplyr::filter(start <= week & (end >= week | is.na(end))) %>%
     dplyr::group_by(week, simulation, period_id) %>%
     dplyr::slice(1) %>%
@@ -41,4 +42,31 @@ placement_timeline_plots <- function(input_dir, output_dir) {
           axis.ticks.y = element_blank(),
           panel.background = element_blank()) +
     labs(fill = "Placement")
+  
+  order_by_join_age <- function(df) {
+    levels <- df %>% group_by(period_id) %>%
+      dplyr::slice(1) %>%
+      mutate(join_age = day_diff(birthday, period_start)) %>%
+      arrange(join_age) %>%
+      pull(period_id)
+    df$period_id <- factor(df$period_id, levels = levels)
+    df
+  }
+  pdf(file = file.path(output_dir, timeline_plot_pdf))
+  for (p in placements) {
+    print(weekly_placements %>%
+      filter(period_id %in% (weekly_placements %>% filter(placement == p) %>% pull(period_id))) %>%
+      mutate(age = day_diff(birthday, week) %/% 7) %>%
+      order_by_join_age() %>%
+      ggplot(aes(age, period_id, fill = placement)) +
+      geom_tile(height = 0.9) +
+      scale_fill_manual(values = placement_colours) +
+      theme(axis.text.y = element_blank(),
+            axis.title.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            panel.background = element_blank()) +
+      labs(fill = "Placement", x = "Age", title = paste("Pathways passing through", p)) +
+      scale_x_continuous(breaks = seq(0,936, by = 52), labels = 0:18))
+  }
+  dev.off()
 }
