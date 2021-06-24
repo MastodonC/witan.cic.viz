@@ -4,7 +4,7 @@ library(ggthemes)
 
 source("src/helpers.R")
 
-cic_by_age_group <- function(input_dir, output_dir, from_date, to_date, group_ages) {
+cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, group_ages) {
   
   projection_episodes_file <- "projection-episodes.csv"
   cic_by_age_group_pdf <- "cic-placement-age-group.pdf"
@@ -41,7 +41,7 @@ cic_by_age_group <- function(input_dir, output_dir, from_date, to_date, group_ag
 
   print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
     geom_bar(stat = "identity") +
-    labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care") +
+    labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care by age") +
     scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)))
 
   for (the.placement in placements) {
@@ -50,14 +50,36 @@ cic_by_age_group <- function(input_dir, output_dir, from_date, to_date, group_ag
       labs(x = "Month", y = "Children in care", fill = "Age group", title = paste("Children in", the.placement)) +
       scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)))
   }
+  
+  all.placements <- c("A3", "A4", "A5", "A6", "H5", "K1", "K2", "M2", "M3", "P1", "P2",
+                      "Q1","Q2", "R1", "R2", "R3", "R5", "S1", "T0", "T4", "Z1",
+                      'Join')
+  placement.colours <- tableau_color_pal("Tableau 20")(20)
+  placement.colours <- c(placement.colours, "#888888", "#FFFFFF")
+  names(placement.colours) <- all.placements
+
+  print(ggplot(chart_data %>% group_by(month, placement) %>% summarise(n = sum(n)), aes(month, n, fill = placement)) +
+          geom_bar(stat = "identity") +
+          labs(x = "Month", y = "Children in care", fill = "Placement", title = "Children in care by placement") +
+          scale_fill_manual(values = placement.colours))
+  
+  for (age.group in categories) {
+    print(ggplot(chart_data %>% filter(age_group == age.group), aes(month, n, fill = placement)) +
+            geom_bar(stat = "identity") +
+            labs(x = "Month", y = "Children in care", fill = "Placement", title = paste(age.group, "children")) +
+            scale_fill_manual(values = placement.colours))
+  }
+  
+  dev.off()
+  
 
   dev.off()
 }
 
 # input_dir <- ''
 # output_dir <- ''
-# from_date <- as.Date("2015-03-31")
-# to_date <- as.Date("2025-03-31")
+# from_date <- as.Date("2016-03-31")
+# to_date <- as.Date("2021-03-31")
 # group_ages <- TRUE
 # 
-# cic_by_age_group(input_dir, output_dir, from_date, to_date, group_ages)
+# cic_placement_age_group(input_dir, output_dir, from_date, to_date, group_ages)
