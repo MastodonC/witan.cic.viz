@@ -17,23 +17,20 @@ generate_historic_simulated_area_plot <- function(input_dir, output_dir, histori
     dplyr::summarise(n_cic = n()) %>%
     dplyr::mutate(provenance = factor(provenance, levels = c("Simulated joiners", "Historic joiners")))
   
-  n_cic <- n_cic %>%
-    inner_join(grid_x_labels)
-  
   ggplot() +
-    geom_area(data = n_cic %>% group_by(label, date, provenance) %>%
+    geom_area(data = n_cic %>% group_by(date, provenance) %>%
                 summarise(median = median(n_cic)),
               aes(date, median, fill = provenance),
               position = "stack") +
     geom_ribbon(data = n_cic %>%
                   filter(provenance == "Historic joiners") %>%
-                  group_by(label, date) %>%
+                  group_by(date) %>%
                   summarise(lower_95 = quantile(n_cic, 0.0275),
                             upper_95 = quantile(n_cic, 0.975)),
                 aes(x = date, ymin = lower_95, ymax = upper_95), fill = "black", alpha = 0.2) +
     geom_ribbon(data = n_cic %>%
                   filter(provenance == "Historic joiners") %>%
-                  group_by(label, date) %>%
+                  group_by(date) %>%
                   summarise(lower_95 = quantile(n_cic, 0.25),
                             upper_95 = quantile(n_cic, 0.75)),
                 aes(x = date, ymin = lower_95, ymax = upper_95), fill = "black", alpha = 0.2) +
@@ -58,7 +55,6 @@ generate_historic_simulated_area_plot <- function(input_dir, output_dir, histori
     scale_fill_manual(values = tableau_color_pal("Tableau 20")(4)[c(3,1)]) +
     labs(y = "CiC count", x = "Date", fill = "Joiners") +
     coord_cartesian(ylim = c(0, max_y))
-    # facet_grid(cols = vars(label))
   ggsave(file.path(output_dir, "historic-simulated-proportion.png"), width = 8, height = 5)
   
   n_cic %>%

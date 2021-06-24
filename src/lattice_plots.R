@@ -157,41 +157,10 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   simulated_grouped_ledger$metric <- factor(simulated_grouped_ledger$metric, levels = label_levels)
   
-# grid_x_labels <- simulated_grouped_ledger %>%
-#   filter(month == "2021-01-01" & metric == "cic" & age_group == "Age 1") %>%
-#   mutate(q = ecdf(n)(n),
-#          label = case_when(q <= 0.25 ~ "q1",
-#                            q <= 0.5 ~ "q2",
-#                            q <= 0.75 ~ "q3",
-#                            TRUE ~ "q4")) %>%
-#   ungroup %>%
-#   dplyr::select(simulation, label)
-# 
-# simulated_grouped_ledger <- grid_x_labels %>%
-#   inner_join(simulated_grouped_ledger, by = "simulation")
-# 
-#   simulated_ci <- simulated_grouped_ledger %>%
-#     group_by(month, age_group, metric, label) %>%
-#     summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n),
-#               upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975))
-#   
   simulated_ci <- simulated_grouped_ledger %>%
     group_by(month, age_group, metric) %>%
     summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n),
               upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975))
-
-  simulated_grouped_ledger %>%
-    filter(metric == "net") %>%
-    ggplot(aes(month, n, group = simulation)) +
-    geom_line(alpha = 0.1) +
-    facet_wrap(vars(age_group)) +
-    coord_cartesian(xlim = c(as.Date("2022-01-01"), as.Date("2022-04-01")))
-
-  simulated_grouped_ledger %>%
-    filter(month >= as.Date("2022-03-01") & month < as.Date("2022-04-01")) %>%
-    filter(age_group == "Age 0") %>%
-    group_by(month, metric) %>%
-    slice(1)
 
   state_labels <- c(
     'joiners' = 'Joiners',
