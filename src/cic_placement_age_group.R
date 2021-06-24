@@ -42,7 +42,9 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
   print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
     geom_bar(stat = "identity") +
     labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care by age") +
-    scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)))
+    scale_fill_manual(values = tableau_color_pal("Tableau 20")(20))
+    # xlim(c(from_date, as.Date("2024-03-31"))) + ylim(c(0, 500)) # Required for 'what happens next?'
+    )
 
   for (the.placement in placements) {
     print(ggplot(chart_data %>% filter(placement == the.placement), aes(month, n, fill = age_group)) +
@@ -70,9 +72,6 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
             scale_fill_manual(values = placement.colours))
   }
   
-  dev.off()
-  
-
   dev.off()
 }
 
