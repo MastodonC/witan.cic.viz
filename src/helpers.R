@@ -18,11 +18,20 @@ year_end <- function(year) {
 }
 
 month_start <- function(month) {
-  as.Date(paste0(month, "-01"))
+  if (is.Date(month)) {
+    day(month) <- 1
+    month
+  } else {
+    as.Date(paste0(month, "-01"))
+  }
 }
 
 month_end <- function(month) {
-  as.Date(paste0(month, "-01")) + months(1) - days(1)
+  if (is.Date(month)) {
+    month_start(month) + months(1) - days(1)
+  } else {
+    as.Date(paste0(month, "-01")) + months(1) - days(1)
+  }
 }
 
 years_before <- function(date, ys) {
