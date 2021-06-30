@@ -35,7 +35,7 @@ placement_timeline_plots <- function(input_dir, output_dir, projection_start) {
   placements <- c("A3", "A4", "A5", "A6", "H5", "K1", "K2", "M2", "M3", "P1", "P2",
                       "Q1","Q2", "R1", "R2", "R3", "R5", "S1", "T0", "T4", "Z1")
   placement_colours <- tableau_color_pal("Tableau 20")(20)
-  placement_colours <- c(placement_colours, "#888888", "#FFFFFF")
+  placement_colours <- c(placement_colours, "#888888")
   names(placement_colours) <- placements
   
   weekly_placements %>%
@@ -64,28 +64,32 @@ placement_timeline_plots <- function(input_dir, output_dir, projection_start) {
   }
   pdf(file = file.path(output_dir, timeline_plot_pdf))
   for (p in placements) {
-    print(weekly_placements %>%
+    chart_data <- weekly_placements %>%
       filter(period_id %in% (weekly_placements %>% filter(placement == p) %>% pull(period_id))) %>%
       mutate(age = day_diff(birthday, week) %/% 7) %>%
-      order_by_join_age() %>%
-      ggplot(aes(age, period_id, fill = placement)) +
-      geom_tile(height = 0.9) +
-      scale_fill_manual(values = placement_colours) +
-      labs(fill = "Placement", x = "Age", title = paste("Pathways passing through", p)) +
-      facet_grid(rows = vars(provenance), labeller = labeller(provenance = provenance_labels), switch = "y", scales = "free_y") +
-      scale_x_continuous(breaks = seq(0,936, by = 52), labels = 0:18, expand = c(0.01,0)) +
-      theme(axis.text.y = element_blank(),
-            axis.title.y = element_blank(),
-            axis.ticks.y = element_blank(),
-            panel.background = element_blank(),
-            panel.grid.major.y = element_blank(),
-            panel.grid.minor.y = element_blank(),
-            panel.grid.minor.x = element_blank(),
-            panel.grid.major.x = element_line(colour = "#DDDDDD"),
-            strip.placement = "outside"))
+      order_by_join_age()
+    if (nrow(chart_data) > 0){
+      print(chart_data %>%
+              ggplot(aes(age, period_id, fill = placement)) +
+              geom_tile(height = 0.9) +
+              scale_fill_manual(values = placement_colours) +
+              labs(fill = "Placement", x = "Age", title = paste("Pathways passing through", p)) +
+              facet_grid(rows = vars(provenance), labeller = labeller(provenance = provenance_labels), switch = "y", scales = "free_y") +
+              scale_x_continuous(breaks = seq(0,936, by = 52), labels = 0:18, expand = c(0.01,0)) +
+              theme(axis.text.y = element_blank(),
+                    axis.title.y = element_blank(),
+                    axis.ticks.y = element_blank(),
+                    panel.background = element_blank(),
+                    panel.grid.major.y = element_blank(),
+                    panel.grid.minor.y = element_blank(),
+                    panel.grid.minor.x = element_blank(),
+                    panel.grid.major.x = element_line(colour = "#DDDDDD"),
+                    strip.placement = "outside")) 
+    }
   }
   dev.off()
 }
 
-# placement_timeline_plots(input_dir, output_dir, as.Date("2020-03-31"))
+# projection_start <- as.Date("2020-03-31")
+# placement_timeline_plots(input_dir, output_dir, projection_start)
 
