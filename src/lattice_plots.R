@@ -15,7 +15,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   lattice_top_line_csv <- "lattice-top-line.csv"
   lattice_pdf <- "lattice-plots.pdf"
   joiner_rates_pdf <- 'joiner-rates.pdf'
-  joiner_rates_csv <- 'joiner-rates.csv'
+  historic_joiner_rates_csv <- 'historic-joiner-rates.csv'
+  simulated_joiner_rates_csv <- 'simulated-joiner-rates.csv'
 
   label_levels <- c("joiners", "agedin", "net", "agedout", "leavers", "cic")
 
@@ -87,6 +88,16 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     mutate(source = "SSDA903")
 
   grouped_ledger$metric <- factor(grouped_ledger$metric, levels = label_levels)
+
+  grouped_ledger %>%
+    mutate(age_group = factor(age_group, levels = paste("Age", 0:17))) %>%
+    filter(metric == "joiners") %>%
+    dcast(month + age_group ~ simulation, value.var = "n", fill = 0) %>%
+    melt(id.vars = c("month", "age_group"), variable.name = "simulation", value.name = "n") %>%
+    dplyr::select(age_group, simulation, n) %>%
+    group_by(age_group) %>%
+    summarise(age_mean = mean(n)) %>%
+    write.csv(file = file.path(output_dir, historic_joiner_rates_csv), row.names = FALSE)
 
   ## Simulated episodes
 
@@ -209,7 +220,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::select(age_group, simulation, n) %>%
     group_by(age_group) %>%
     summarise(age_mean = mean(n)) %>%
-    write.csv(file = file.path(output_dir, joiner_rates_csv), row.names = FALSE)
+    write.csv(file = file.path(output_dir, simulated_joiner_rates_csv), row.names = FALSE)
 
   rbind(simulated_grouped_ledger %>%
           group_by(month, age_group, metric, source) %>%
