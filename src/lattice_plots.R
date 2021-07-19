@@ -249,6 +249,26 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   category_labels <- paste(categories, "count of children")
   names(category_labels) <- categories
 
+  simulated_ci$age_group <- factor(simulated_ci$age_group, levels = categories)
+  grouped_ledger$age_group <- factor(grouped_ledger$age_group, levels = categories)
+
+  print(ggplot() +
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic"),
+                      aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic"),
+                      aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
+          geom_line(data = simulated_ci %>% filter(metric == "cic"),
+                    aes(month, median, colour = metric), linetype = 3) +
+          geom_line(data = grouped_ledger %>% filter(metric == "cic"),
+                    aes(month, n, group = simulation, colour = metric),
+                    stat = "identity", alpha = 1) +
+          facet_wrap(vars(age_group), labeller = labeller(metric = state_labels, age_group = category_labels), scales = "free_y",
+                     ncol = 3) +
+          scale_colour_manual(values = colours) +
+          scale_fill_manual(values = colours) +
+          theme(legend.position = "none") +
+          labs(x = "Date", y = "Children"))
+
   for (category in categories) {
     print(ggplot() +
         geom_ribbon(data = simulated_ci %>% filter(age_group == category),
