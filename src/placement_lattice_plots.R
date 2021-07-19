@@ -69,11 +69,12 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(start <= month & (end >= month | is.na(end))) %>%
         dplyr::group_by(month, placement, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, placement, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, placement, metric, simulation, n)
     ) %>%
     filter(month >= historic_start & month <= historic_end)
-  
+
   grouped_ledger <- rbind(grouped_ledger,
                           dcast(simulation + month + placement ~ metric, value.var = "n", data = grouped_ledger, fill = 0) %>%
                             mutate(net = joiners + movedin - movedout - leavers) %>%
@@ -90,7 +91,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     dplyr::mutate(period_id = ID, period_start = ymd(Period.Start), period_end = ymd(Period.End),
                   birthday = ymd(Birthday), start = ymd(Start), end = ymd(End),
                   provenance = Provenance, placement = Placement, simulation = Simulation, episode = Episode) %>%
-    dplyr::select(period_id, simulation, episode, period_start, period_end, start, end, birthday, provenance, placement)
+    dplyr::select(period_id, simulation, episode, period_start, period_end, start, end, birthday, provenance, placement) %>%
+    mutate(simulation = factor(simulation)) # Required to fill blanks
   
   simulated_migrations <- simulated_episodes %>%
     inner_join(simulated_episodes, by = c("period_id", "simulation")) %>%
@@ -129,6 +131,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(start <= month & (end >= month | is.na(end))) %>%
         dplyr::group_by(month, placement, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, placement, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, placement, metric, simulation, n)
     ) %>%
@@ -262,6 +265,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, metric, simulation, n)
     ) %>%
@@ -312,10 +316,11 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     complete(month, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       simulated_episodes %>%
-        dplyr::inner_join(data.frame(month = floor_date(seq(historic_end - years(1), projection_end, by = "month"), unit = "month")), by = character()) %>%
+        dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, metric, simulation, n)
     ) %>%
