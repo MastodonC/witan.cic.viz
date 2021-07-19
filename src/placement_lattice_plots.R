@@ -379,7 +379,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
   dev.off()
   
   rbind(simulated_grouped_ledger %>%
-          filter(month > projection_start & month <= projection_end) %>%
+          filter(month >= projection_start & month <= projection_end) %>%
           group_by(month, metric, source) %>%
           dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
         grouped_ledger %>%

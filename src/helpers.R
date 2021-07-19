@@ -253,3 +253,15 @@ joiners_leavers_net <- function(labelled_episodes) {
           mutate(label = "net"))
 }
 
+financial_year <- function(date) {
+  year <- year(date - months(3))
+  paste0(year, "/", substr(year + 1, 3,4))
+}
+
+financial_year_start <- function(date) {
+  as.Date(paste0(if (month(date) < 4) { year(date) - 1 } else { year(date) }, "-04-01"))
+}
+
+financial_year_end <- function(date) {
+  financial_year_start(date) + years(1) - days(1)
+}
