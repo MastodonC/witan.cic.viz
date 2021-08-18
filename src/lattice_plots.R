@@ -443,7 +443,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         grouped_ledger %>%
           filter(month >= projection_start & month <= historic_end) %>%
           group_by(month, metric, source) %>%
-          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
+          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975))
   ) %>%
     write.csv(file = file.path(output_dir, lattice_top_line_csv), row.names = FALSE)
 
@@ -552,7 +552,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
           dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
         grouped_ledger %>%
           group_by(financial_year, metric, source) %>%
-          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
+          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975))
   ) %>%
     write.csv(file = file.path(output_dir, lattice_top_line_by_year_csv), row.names = FALSE)
 
