@@ -68,6 +68,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, age_group, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_start, historic_end, by = "month"), unit = "month")), by = character()) %>%
@@ -77,10 +78,11 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::summarise(n = n_distinct(period_id)) %>%
         complete(month, age_group, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, age_group, metric, simulation, n)
+        dplyr::select(month, age_group, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
-
+  
   grouped_ledger <- rbind(grouped_ledger,
                           dcast(simulation + month + age_group ~ metric, value.var = "n", data = grouped_ledger, fill = 0) %>%
                             mutate(net = joiners + agedin - agedout - leavers) %>%
@@ -150,6 +152,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, age_group, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
@@ -159,7 +162,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::summarise(n = n_distinct(period_id)) %>%
         complete(month, age_group, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, age_group, metric, simulation, n)
+        dplyr::select(month, age_group, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month > projection_start & month <= projection_end)
 
@@ -308,6 +312,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_start, historic_end, by = "month"), unit = "month")), by = character()) %>%
@@ -316,7 +321,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::summarise(n = n_distinct(period_id)) %>%
         complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, metric, simulation, n)
+        dplyr::select(month, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
   
@@ -364,6 +370,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
@@ -372,7 +379,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::summarise(n = n_distinct(period_id)) %>%
         complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, metric, simulation, n)
+        dplyr::select(month, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month > projection_start & month <= projection_end)
 
@@ -458,6 +466,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     group_by(financial_year, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
     complete(financial_year, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = seq(financial_year_start(historic_start), historic_end, by = "year")), by = character()) %>%
@@ -467,7 +476,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::summarise(n = n_distinct(period_id)) %>%
         complete(financial_year, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(financial_year, metric, simulation, n)
+        dplyr::select(financial_year, metric, simulation, n) %>%
+        as.data.frame()
     )
 
   grouped_ledger <- rbind(grouped_ledger,
@@ -512,6 +522,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     group_by(financial_year, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
     complete(financial_year, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = seq(financial_year_start(projection_start), financial_year_end(projection_end), by = "year")), by = character()) %>%
@@ -521,7 +532,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::summarise(n = n_distinct(period_id)) %>%
         complete(financial_year, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(financial_year, metric, simulation, n)
+        dplyr::select(financial_year, metric, simulation, n) %>%
+        as.data.frame()
     )
 
   simulated_grouped_ledger <- rbind(simulated_grouped_ledger,
