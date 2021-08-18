@@ -2,7 +2,7 @@ library(dplyr)
 library(ggplot2)
 
 # Projection date is the date from which we start tracking simulated joiners
-generate_joiners_proportion_area_plot <- function(input_dir, output_dir, historic_start, historic_end, max_y, period_start_date) {
+generate_joiners_proportion_area_plot <- function(input_dir, output_dir, historic_start, historic_end, period_start_date) {
   projection_episodes <- file.path(input_dir, "historic-episodes.csv")
   projected_periods <- read.csv(projection_episodes) %>%
     filter(Episode == 1) %>%
@@ -26,8 +26,7 @@ generate_joiners_proportion_area_plot <- function(input_dir, output_dir, histori
               aes(date, median, fill = provenance),
               position = "stack") +
     scale_fill_manual(values = tableau_color_pal("Tableau 20")(4)[c(3,1)]) +
-    labs(y = "CiC count", x = "Date", fill = "CiC count") +
-    coord_cartesian(ylim = c(0, max_y))
+    labs(y = "CiC count", x = "Date", fill = "CiC count")
   ggsave(file.path(output_dir, "historic-joiner-proportion.png"), width = 8, height = 5)
   
   n_cic %>%
@@ -44,8 +43,7 @@ input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-06-16/outputs/tren
 output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-06-16/outputs/trended/'
 historic_start <- as.Date("2014-03-01")
 historic_end <-  as.Date("2021-03-31")
-max_y <- 450
 period_start_date <- as.Date("2017-03-01")
 
 generate_joiners_proportion_area_plot(input_dir, output_dir,
-                                      historic_start, historic_end, max_y, period_start_date)
+                                      historic_start, historic_end, period_start_date)
