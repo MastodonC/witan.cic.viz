@@ -6,7 +6,9 @@ library(ggthemes)
 library(tidyquant)
 source("src/helpers.R")
 
-## To generate only historic plots, set `projection_start` and `projection_end` to be one month apart and less than `historic_end`
+## To generate only historic plots, set `projection_start` and `projection_end` to be 
+## one month apart and less than `historic_end`
+## N.B. you will see a number of warnings as the charting will assume data is missingßß
 generate_lattice_plots <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, group_ages = FALSE) {
 
   historic_episodes_file <- "historic-episodes.csv"
