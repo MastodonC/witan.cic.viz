@@ -28,7 +28,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   migrations <- bootstrapped_actuals %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
@@ -112,7 +112,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   simulated_migrations <- simulated_episodes %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
@@ -346,7 +346,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   simulated_migrations <- simulated_episodes %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
@@ -499,7 +499,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   simulated_migrations <- simulated_episodes %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
