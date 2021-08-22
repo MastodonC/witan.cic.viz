@@ -63,6 +63,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     group_by(month, placement, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
     complete(month, placement, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_start, historic_end, by = "month"), unit = "month")), by = character()) %>%
@@ -70,7 +71,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::group_by(month, placement, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, placement, metric, simulation, n)
+        dplyr::select(month, placement, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
   
@@ -123,6 +125,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     group_by(month, placement, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
     complete(month, placement, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
@@ -130,7 +133,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::group_by(month, placement, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, placement, metric, simulation, n)
+        dplyr::select(month, placement, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month > projection_start & month <= projection_end)
   
@@ -256,6 +260,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     group_by(month, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_start, historic_end, by = "month"), unit = "month")), by = character()) %>%
@@ -263,7 +268,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, metric, simulation, n)
+        dplyr::select(month, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
   
@@ -310,6 +316,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     group_by(month, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_end - years(1), projection_end, by = "month"), unit = "month")), by = character()) %>%
@@ -317,7 +324,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, metric, simulation, n)
+        dplyr::select(month, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month > projection_start & month <= projection_end)
   
