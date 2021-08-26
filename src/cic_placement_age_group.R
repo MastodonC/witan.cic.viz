@@ -40,20 +40,20 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
 
   pdf(file = file.path(output_dir, cic_by_age_group_pdf))
 
-  print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
-    geom_bar(stat = "identity") +
-    labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care by age") +
-    scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)) +
-    xlim(c(from_date, as.Date("2024-03-31"))) + ylim(c(0, 500)) # Required for 'what happens next?'
-    )
-
-  print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
-          geom_bar(stat = "identity", position = "fill") +
-          labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care by age") +
-          scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)) +
-          scale_y_continuous(breaks = seq(0, 1, by = 0.2), labels = paste0(seq(0, 100, by = 20), "%")) +
-          xlim(c(from_date, as.Date("2024-03-31"))) # Required for 'what happens next?'
-  )
+  # print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
+  #   geom_bar(stat = "identity") +
+  #   labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care by age") +
+  #   scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)) +
+  #   xlim(c(from_date, as.Date("2024-03-31"))) + ylim(c(0, 500)) # Required for 'what happens next?'
+  #   )
+  # 
+  # print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
+  #         geom_bar(stat = "identity", position = "fill") +
+  #         labs(x = "Month", y = "Children in care", fill = "Age group", title = "Children in care by age") +
+  #         scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)) +
+  #         scale_y_continuous(breaks = seq(0, 1, by = 0.2), labels = paste0(seq(0, 100, by = 20), "%")) +
+  #         xlim(c(from_date, as.Date("2024-03-31"))) # Required for 'what happens next?'
+  # )
 
   print(ggplot(chart_data %>% group_by(month, age_group) %>% summarise(n = sum(n)), aes(month, n, fill = age_group)) +
           geom_bar(stat = "identity") +
@@ -120,10 +120,10 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
   dev.off()
 }
 
-# input_dir <- ''
-# output_dir <- ''
-# from_date <- as.Date("2016-03-31")
-# to_date <- as.Date("2021-03-31")
-# group_ages <- TRUE
-# 
+input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2021-1'
+output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2021-1'
+from_date <- as.Date("2014-03-31")
+to_date <- as.Date("2027-03-31")
+group_ages <- TRUE
+ 
 cic_placement_age_group(input_dir, output_dir, from_date, to_date, group_ages)
