@@ -62,6 +62,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, placement, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, placement, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       bootstrapped_actuals %>%
@@ -69,6 +70,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(start <= month & (end >= month | is.na(end))) %>%
         dplyr::group_by(month, placement, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
+        complete(month, placement, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, placement, metric, simulation, n)
     ) %>%
@@ -122,6 +125,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, placement, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, placement, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       simulated_episodes %>%
@@ -129,6 +133,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(start <= month & (end >= month | is.na(end))) %>%
         dplyr::group_by(month, placement, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
+        complete(month, placement, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, placement, metric, simulation, n)
     ) %>%
@@ -255,6 +261,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       bootstrapped_actuals %>%
@@ -262,6 +269,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
+        complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, metric, simulation, n)
     ) %>%
@@ -309,6 +318,7 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       simulated_episodes %>%
@@ -316,6 +326,8 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
+        complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, metric, simulation, n)
     ) %>%
@@ -386,14 +398,14 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
 }
 
 
-# input_dir <- ''
-# output_dir <- ''
-# historic_start <- as.Date("2015-03-01")
-# historic_end <-  as.Date("2021-03-31")
-# projection_start <- as.Date("2015-03-31")
-# projection_end <- as.Date("2025-03-31")
-# 
-# generate_placement_lattice_plots(input_dir, output_dir,
-#                        historic_start, historic_end,
-#                        projection_start, projection_end)
-# 
+input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2019-1'
+output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2019-1'
+historic_start <- as.Date("2014-03-01")
+historic_end <-  as.Date("2021-03-31")
+projection_start <- as.Date("2019-01-31")
+projection_end <- as.Date("2025-03-31")
+group_ages <- FALSE
+
+generate_placement_lattice_plots(input_dir, output_dir,
+                       historic_start, historic_end,
+                       projection_start, projection_end)
