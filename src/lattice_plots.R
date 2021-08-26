@@ -64,6 +64,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, age_group, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, age_group, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       bootstrapped_actuals %>%
@@ -134,10 +135,11 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, age_group, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, age_group, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       simulated_episodes %>%
-        dplyr::inner_join(data.frame(month = floor_date(seq(historic_end - years(1), projection_end, by = "month"), unit = "month")), by = character()) %>%
+        dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::mutate(age_group = age_category(year_diff(birthday, month), group_ages)) %>%
         dplyr::group_by(month, age_group, simulation) %>%
@@ -270,6 +272,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       bootstrapped_actuals %>%
@@ -324,10 +327,11 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     mutate(month = floor_date(date, unit = "month")) %>%
     group_by(month, metric, simulation) %>%
     dplyr::summarise(n = n(), .groups = "drop") %>%
+    ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
     rbind(
       simulated_episodes %>%
-        dplyr::inner_join(data.frame(month = floor_date(seq(historic_end - years(1), projection_end, by = "month"), unit = "month")), by = character()) %>%
+        dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
