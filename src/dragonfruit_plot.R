@@ -47,22 +47,24 @@ generate_dragonfruit_plot <- function(input_dir, output_dir, projection_start) {
   print(summary_plot(projected_periods %>%
                      mutate(end = period_end_duration, start = projection_start_duration)) +
           scale_y_continuous(breaks = 0:18) +
-          scale_colour_manual(name = "Legend", guide = "legend",
-                              values = c("start" = "orange", "median" = "black",
-                                         "range" = "#CCCCCC", "ci" = "#999999", "iqr" = "#333333"),
-                              labels = c("Case duration at projection start", "Median period duration",
-                                         "Duration range", "Duration 95% CI", "Duration IQR"),
-                              limits = c("start", "median", "range", "ci", "iqr")) +
+          scale_discrete_manual("Legend",
+                                aesthetics = "colour",
+                                values = c("start" = "orange", "median" = "black",
+                                           "range" = "#CCCCCC", "ci" = "#999999", "iqr" = "#333333"),
+                                labels = c("Child age at projection start", "Median leave age",
+                                           "Leave age range", "Leave age 95% CI", "Leave age IQR"),
+                                limits = c("start", "median", "range", "ci", "iqr")) +
           theme(axis.title.x=element_blank(),
                 axis.text.x=element_blank(),
                 axis.ticks.x=element_blank(),
                 panel.grid.major.x = element_blank(),
                 panel.grid.minor.x = element_blank()) +
-          labs(x = "Periods", y = "Age in years", title = "Projected duration distribution per open period"))
+          labs(x = "Periods", y = "Duration in years", title = "Projected duration distribution per open period"))
   print(summary_plot(projected_periods %>%
                        mutate(end = period_end_age, start = projection_start_age)) +
           scale_y_continuous(breaks = 0:18) +
-          scale_colour_manual(name = "Legend", guide = "legend",
+          scale_discrete_manual("Legend",
+                                aesthetics = "colour",
                               values = c("start" = "orange", "median" = "black",
                                          "range" = "#CCCCCC", "ci" = "#999999", "iqr" = "#333333"),
                               labels = c("Child age at projection start", "Median leave age",
@@ -82,4 +84,3 @@ input_dir <- ''
 output_dir <- ''
 projection_start <- as.Date("2019-03-31")
 generate_dragonfruit_plot(input_dir, output_dir, projection_start)
-
