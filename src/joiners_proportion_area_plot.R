@@ -1,7 +1,6 @@
 library(dplyr)
 library(ggplot2)
 
-# Projection date is the date from which we start tracking simulated joiners
 generate_joiners_proportion_area_plot <- function(input_dir, output_dir, historic_start, historic_end, period_start_date) {
   projection_episodes <- file.path(input_dir, "historic-episodes.csv")
   projected_periods <- read.csv(projection_episodes) %>%
@@ -39,8 +38,8 @@ generate_joiners_proportion_area_plot <- function(input_dir, output_dir, histori
     write.csv(file = file.path(output_dir, "historic-joiner-proportion.csv"), row.names = FALSE)
 }
 
-input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-06-16/outputs/trended/'
-output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-06-16/outputs/trended/'
+input_dir <- ''
+output_dir <- ''
 historic_start <- as.Date("2014-03-01")
 historic_end <-  as.Date("2021-03-31")
 period_start_date <- as.Date("2017-03-01")
