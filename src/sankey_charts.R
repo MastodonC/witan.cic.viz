@@ -2,7 +2,6 @@ library(dplyr)
 library(networkD3)
 library(htmlwidgets)
 library(webshot)
-library(filesstrings)
 
 sankey_chart <- function(input_dir, output_dir) {
 
@@ -91,16 +90,19 @@ sankey_chart <- function(input_dir, output_dir) {
   transitions <- sankey_transitions %>% group_by(placement, next_placement, sequence) %>% summarise(n = sum(n)) %>% ungroup
   transitions %>% filter(placement == next_placement)
   sankey <- sankey_from_transitions(transitions)
-  saveWidget(sankey, file="sankey.html")
-  webshot("sankey.html", "sankey-all.pdf")
-  file.move("sankey-all.pdf", paste0(output_dir))
+
+  temp_file = tempfile(fileext = ".html")
+  saveWidget(sankey, file=temp_file)
+  webshot(temp_file, file.path(output_dir, "sankey-all.pdf"))
 
   for (age in 0:17) {
     transitions <- sankey_transitions %>% filter(admission_age == age)
     sankey <- sankey_from_transitions(transitions)
-    saveWidget(sankey, file="sankey.html")
-    file <- paste0("sankey-age-", age, ".pdf")
-    webshot("sankey.html", file)
-    file.move(file, paste0(output_dir))
+    saveWidget(sankey, file=temp_file)
+    webshot(temp_file, file.path(output_dir, paste0("sankey-age-", age, ".pdf")))
   }
 }
+
+# input_dir <- ''
+# output_dir <- ''
+# sankey_chart(input_dir, output_dir)
