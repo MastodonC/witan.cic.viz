@@ -37,36 +37,49 @@ generate_dragonfruit_plot <- function(input_dir, output_dir, projection_start) {
     
     chart_data %>%
       ggplot() +
-      geom_point(aes(index, median)) +
-      geom_point(aes(index, start), colour = "orange") +
-      geom_linerange(aes(index, ymin = min, ymax = max), alpha = 0.1) +
-      geom_linerange(aes(index, ymin = l95, ymax = u95), alpha = 0.2) +
-      geom_linerange(aes(index, ymin = l50, ymax = u50), alpha = 0.5)
+      geom_linerange(aes(index, ymin = min, ymax = max, colour = "range")) +
+      geom_linerange(aes(index, ymin = l95, ymax = u95, colour = "ci")) +
+      geom_linerange(aes(index, ymin = l50, ymax = u50, colour = "iqr")) +
+      geom_point(aes(index, median, colour = "median")) +
+      geom_point(aes(index, start, color = "start"))
   }
   pdf(file = file.path(output_dir, dragonfruit_pdf), width=11, height=8.5)
   print(summary_plot(projected_periods %>%
                      mutate(end = period_end_duration, start = projection_start_duration)) +
           scale_y_continuous(breaks = 0:18) +
+          scale_colour_manual(name = "Legend", guide = "legend",
+                              values = c("start" = "orange", "median" = "black",
+                                         "range" = "#CCCCCC", "ci" = "#999999", "iqr" = "#333333"),
+                              labels = c("Case duration at projection start", "Median period duration",
+                                         "Duration range", "Duration 95% CI", "Duration IQR"),
+                              limits = c("start", "median", "range", "ci", "iqr")) +
           theme(axis.title.x=element_blank(),
                 axis.text.x=element_blank(),
                 axis.ticks.x=element_blank(),
                 panel.grid.major.x = element_blank(),
                 panel.grid.minor.x = element_blank()) +
-          labs(title = "Projected closed durations"))
+          labs(x = "Periods", y = "Age in years", title = "Projected duration distribution per open period"))
   print(summary_plot(projected_periods %>%
                        mutate(end = period_end_age, start = projection_start_age)) +
           scale_y_continuous(breaks = 0:18) +
+          scale_colour_manual(name = "Legend", guide = "legend",
+                              values = c("start" = "orange", "median" = "black",
+                                         "range" = "#CCCCCC", "ci" = "#999999", "iqr" = "#333333"),
+                              labels = c("Child age at projection start", "Median leave age",
+                                         "Leave age range", "Leave age 95% CI", "Leave age IQR"),
+                              limits = c("start", "median", "range", "ci", "iqr")) +
           theme(axis.title.x=element_blank(),
                 axis.text.x=element_blank(),
                 axis.ticks.x=element_blank(),
                 panel.grid.major.x = element_blank(),
                 panel.grid.minor.x = element_blank()) +
-          labs(title = "Projected closed ages"))
+          labs(x = "Periods", y = "Age in years", title = "Projected leave age distribution per open period"))
   dev.off()
   
 }
 
-# input_dir <- '/Users/henry/Mastodon C/witan.cic/data/scc/2021-06-10/04-untrended-1000'
-# output_dir <- '/Users/henry/Mastodon C/witan.cic/data/scc/2021-06-10/04-untrended-1000'
-# generate_dragonfruit_plot(input_dir, output_dir, as.Date("2019-03-31"))
+input_dir <- ''
+output_dir <- ''
+projection_start <- as.Date("2019-03-31")
+generate_dragonfruit_plot(input_dir, output_dir, projection_start)
 
