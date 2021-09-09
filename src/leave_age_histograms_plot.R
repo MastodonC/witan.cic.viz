@@ -4,11 +4,10 @@ library(lubridate)
 source("src/helpers.R")
 
 # Provenance filters will default to just historic episodes unless specified
-generate_leave_age_histograms_plot <- function(input_dir, output_dir, provenance_1 = "H",
-                                               provenance_2 = "H") {
+generate_leave_age_histograms_plot <- function(input_dir, output_dir, provenance = c("H")) {
   projection_episodes <- file.path(input_dir, "projection-episodes.csv")
   projected_periods <- read.csv(projection_episodes) %>%
-    filter(Episode == 1 & Provenance == provenance_1 | Episode == 1 & Provenance == provenance_2) %>%
+    filter(Episode == 1 & Provenance %in% provenance) %>%
     dplyr::mutate(period_start = ymd(Period.Start), period_end = ymd(Period.End), birthday = ymd(Birthday), provenance = Provenance, simulation = Simulation, duration = Period.Duration) %>%
     dplyr::select(ID, simulation, period_start, period_end, birthday, provenance, duration) %>%
     mutate(join_age_days = day_diff(birthday, period_start), leave_age_days = day_diff(birthday, period_end)) %>%
@@ -28,16 +27,12 @@ generate_leave_age_histograms_plot <- function(input_dir, output_dir, provenance
       labs(x = "Leave age", y = "Probability distribution") +
     theme_mastodon
 
-  if (provenance_1 == provenance_2) {
-    filename <- "historic-leave-age-histograms.png"
-  } else {
-    filename <- "historic-and-adjusted-leave-age-histograms.png"
-  }
+  filename <- paste0("historic-leave-age-histograms-", paste0(provenance,collapse ="-"),"-provenance.png")
   ggsave(file.path(output_dir, filename), width = 8, height = 5)
 }
 
-# input_dir <- '/Users/Seb/code/witan.cic.surrey/data/outputs/'
-# output_dir <- '/Users/Seb/code/witan.cic.surrey/data/historic-charts/'
-# 
-# generate_leave_age_histograms_plot(input_dir, output_dir, "H", "P")
+input_dir <- ''
+output_dir <- ''
+provenance = c("S")
+generate_leave_age_histograms_plot(input_dir, output_dir, provenance)
 
