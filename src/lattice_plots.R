@@ -6,6 +6,9 @@ library(ggthemes)
 library(tidyquant)
 source("src/helpers.R")
 
+## To generate only historic plots, set `projection_start` and `projection_end` to be 
+## one month apart and less than `historic_end`
+## N.B. you will see a number of warnings as the charting will assume data is missingßß
 generate_lattice_plots <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, group_ages = FALSE) {
 
   historic_episodes_file <- "historic-episodes.csv"
@@ -13,9 +16,11 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   lattice_by_age_csv <- "lattice-by-age-group.csv"
   lattice_by_age_simulation_csv <- "lattice-by-age-group-simulation.csv"
   lattice_top_line_csv <- "lattice-top-line.csv"
+  lattice_top_line_by_year_csv <- "lattice-top-line-by-year.csv"
   lattice_pdf <- "lattice-plots.pdf"
   joiner_rates_pdf <- 'joiner-rates.pdf'
-  joiner_rates_csv <- 'joiner-rates.csv'
+  historic_joiner_rates_csv <- 'historic-joiner-rates.csv'
+  simulated_joiner_rates_csv <- 'simulated-joiner-rates.csv'
 
   label_levels <- c("joiners", "agedin", "net", "agedout", "leavers", "cic")
 
@@ -26,7 +31,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   migrations <- bootstrapped_actuals %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
@@ -66,6 +71,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, age_group, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_start, historic_end, by = "month"), unit = "month")), by = character()) %>%
@@ -73,11 +79,13 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::mutate(age_group = age_category(year_diff(birthday, month), group_ages)) %>%
         dplyr::group_by(month, age_group, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, age_group, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, age_group, metric, simulation, n)
+        dplyr::select(month, age_group, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
-
+  
   grouped_ledger <- rbind(grouped_ledger,
                           dcast(simulation + month + age_group ~ metric, value.var = "n", data = grouped_ledger, fill = 0) %>%
                             mutate(net = joiners + agedin - agedout - leavers) %>%
@@ -88,6 +96,16 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   grouped_ledger$metric <- factor(grouped_ledger$metric, levels = label_levels)
 
+  grouped_ledger %>%
+    mutate(age_group = factor(age_group, levels = paste("Age", 0:17))) %>%
+    filter(metric == "joiners") %>%
+    dcast(month + age_group ~ simulation, value.var = "n", fill = 0) %>%
+    melt(id.vars = c("month", "age_group"), variable.name = "simulation", value.name = "n") %>%
+    dplyr::select(age_group, simulation, n) %>%
+    group_by(age_group) %>%
+    summarise(age_mean = mean(n)) %>%
+    write.csv(file = file.path(output_dir, historic_joiner_rates_csv), row.names = FALSE)
+
   ## Simulated episodes
 
   simulated_episodes <- read.csv(file.path(input_dir, projection_episodes_file)) %>%
@@ -97,7 +115,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   simulated_migrations <- simulated_episodes %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
@@ -137,6 +155,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, age_group, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
@@ -144,8 +163,10 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::mutate(age_group = age_category(year_diff(birthday, month), group_ages)) %>%
         dplyr::group_by(month, age_group, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, age_group, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, age_group, metric, simulation, n)
+        dplyr::select(month, age_group, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month > projection_start & month <= projection_end)
 
@@ -209,7 +230,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::select(age_group, simulation, n) %>%
     group_by(age_group) %>%
     summarise(age_mean = mean(n)) %>%
-    write.csv(file = file.path(output_dir, joiner_rates_csv), row.names = FALSE)
+    write.csv(file = file.path(output_dir, simulated_joiner_rates_csv), row.names = FALSE)
 
   rbind(simulated_grouped_ledger %>%
           group_by(month, age_group, metric, source) %>%
@@ -234,6 +255,26 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   categories <- if(group_ages) {age_categories} else {age_labels}
   category_labels <- paste(categories, "count of children")
   names(category_labels) <- categories
+
+  simulated_ci$age_group <- factor(simulated_ci$age_group, levels = categories)
+  grouped_ledger$age_group <- factor(grouped_ledger$age_group, levels = categories)
+
+  print(ggplot() +
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic"),
+                      aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic"),
+                      aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
+          geom_line(data = simulated_ci %>% filter(metric == "cic"),
+                    aes(month, median, colour = metric), linetype = 3) +
+          geom_line(data = grouped_ledger %>% filter(metric == "cic"),
+                    aes(month, n, group = simulation, colour = metric),
+                    stat = "identity", alpha = 1) +
+          facet_wrap(vars(age_group), labeller = labeller(metric = state_labels, age_group = category_labels), scales = "free_y",
+                     ncol = 3) +
+          scale_colour_manual(values = colours) +
+          scale_fill_manual(values = colours) +
+          theme(legend.position = "none") +
+          labs(x = "Date", y = "Children"))
 
   for (category in categories) {
     print(ggplot() +
@@ -274,14 +315,17 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       bootstrapped_actuals %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(historic_start, historic_end, by = "month"), unit = "month")), by = character()) %>%
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, metric, simulation, n)
+        dplyr::select(month, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
   
@@ -305,7 +349,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   simulated_migrations <- simulated_episodes %>%
     group_by(period_id, simulation) %>%
-    slice_head(1) %>%
+    slice_head() %>%
     ungroup %>%
     inner_join(data.frame(age = 1:17), by = character()) %>%
     mutate(anniversary = birthday + years(age)) %>%
@@ -329,14 +373,17 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
     dplyr::summarise(n = n(), .groups = "drop") %>%
     ungroup %>%
     complete(month, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
     rbind(
       simulated_episodes %>%
         dplyr::inner_join(data.frame(month = floor_date(seq(projection_start, projection_end, by = "month"), unit = "month")), by = character()) %>%
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
-        dplyr::select(month, metric, simulation, n)
+        dplyr::select(month, metric, simulation, n) %>%
+        as.data.frame()
     ) %>%
     filter(month > projection_start & month <= projection_end)
 
@@ -393,15 +440,125 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   dev.off()
 
   rbind(simulated_grouped_ledger %>%
-          filter(month > projection_start & month <= projection_end) %>%
+          filter(month >= projection_start & month <= projection_end) %>%
           group_by(month, metric, source) %>%
           dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
         grouped_ledger %>%
-          filter(month >= projection_start & month <= historic_end) %>%
+          filter(month >= historic_start & month <= historic_end) %>%
           group_by(month, metric, source) %>%
-          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
+          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975))
   ) %>%
     write.csv(file = file.path(output_dir, lattice_top_line_csv), row.names = FALSE)
+
+
+  # Same but for all CiC each financial year (April - March)
+
+  grouped_ledger <- rbind(
+    bootstrapped_actuals %>%
+      dplyr::group_by(period_id, simulation) %>%
+      dplyr::summarise(date = min(period_start), birthday = birthday[1], .groups = "drop") %>%
+      dplyr::select(date, simulation) %>%
+      dplyr::mutate(metric = "joiners"),
+    bootstrapped_actuals %>%
+      dplyr::group_by(period_id, simulation) %>%
+      dplyr::summarise(date = max(period_end), birthday = birthday[1], .groups = "drop") %>%
+      dplyr::select(date, simulation) %>%
+      dplyr::mutate(metric = "leavers")
+  ) %>%
+    mutate(financial_year = financial_year(date)) %>%
+    group_by(financial_year, metric, simulation) %>%
+    dplyr::summarise(n = n(), .groups = "drop") %>%
+    complete(financial_year, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame() %>%
+    rbind(
+      bootstrapped_actuals %>%
+        dplyr::inner_join(data.frame(month = seq(financial_year_start(historic_start), historic_end, by = "year")), by = character()) %>%
+        dplyr::filter(period_start <= month & period_end >= month) %>%
+        dplyr::mutate(financial_year = financial_year(month)) %>%
+        dplyr::group_by(financial_year, simulation) %>%
+        dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(financial_year, simulation, fill = list(n = 0)) %>%
+        dplyr::mutate(metric = "cic") %>%
+        dplyr::select(financial_year, metric, simulation, n) %>%
+        as.data.frame()
+    )
+
+  grouped_ledger <- rbind(grouped_ledger,
+                          dcast(simulation + financial_year ~ metric, value.var = "n", data = grouped_ledger, fill = 0) %>%
+                            mutate(net = joiners - leavers ) %>%
+                            dplyr::select(simulation, financial_year, net) %>%
+                            rename(n = net) %>%
+                            mutate(metric = "net")) %>%
+    mutate(source = "SSDA903")
+
+  grouped_ledger$metric <- factor(grouped_ledger$metric, levels = label_levels)
+
+  ## Simulated episodes
+
+  simulated_episodes <- read.csv(file.path(input_dir, projection_episodes_file)) %>%
+    filter(Episode == 1) %>%
+    dplyr::mutate(period_id = ID, period_start = ymd(Period.Start), period_end = ymd(Period.End), birthday = ymd(Birthday), provenance = Provenance, simulation = Simulation) %>%
+    dplyr::select(period_id, simulation, period_start, period_end, birthday, provenance)
+
+  simulated_migrations <- simulated_episodes %>%
+    group_by(period_id, simulation) %>%
+    slice_head() %>%
+    ungroup %>%
+    inner_join(data.frame(age = 1:17), by = character()) %>%
+    mutate(anniversary = birthday + years(age)) %>%
+    filter(period_start <= anniversary & period_end > anniversary) %>%
+    mutate(age_before = age - 1, age_after = age)
+
+  simulated_grouped_ledger <- rbind(
+    simulated_episodes %>%
+      dplyr::group_by(period_id, simulation) %>%
+      dplyr::summarise(date = min(period_start), birthday = birthday[1], .groups = "drop") %>%
+      dplyr::select(date, simulation) %>%
+      dplyr::mutate(metric = "joiners"),
+    simulated_episodes %>%
+      dplyr::group_by(period_id, simulation) %>%
+      dplyr::summarise(date = max(period_end), birthday = birthday[1], .groups = "drop") %>%
+      dplyr::select(date, simulation) %>%
+      dplyr::mutate(metric = "leavers")
+  ) %>%
+    mutate(financial_year = financial_year(date)) %>%
+    group_by(financial_year, metric, simulation) %>%
+    dplyr::summarise(n = n(), .groups = "drop") %>%
+    complete(financial_year, metric, simulation, fill = list(n = 0)) %>%
+    as.data.frame %>%
+    rbind(
+      simulated_episodes %>%
+        dplyr::inner_join(data.frame(month = seq(financial_year_start(projection_start), financial_year_end(projection_end), by = "year")), by = character()) %>%
+        dplyr::filter(period_start <= month & period_end >= month) %>%
+        dplyr::mutate(financial_year = financial_year(month)) %>%
+        dplyr::group_by(financial_year, simulation) %>%
+        dplyr::summarise(n = n_distinct(period_id)) %>%
+        complete(financial_year, simulation, fill = list(n = 0)) %>%
+        dplyr::mutate(metric = "cic") %>%
+        dplyr::select(financial_year, metric, simulation, n) %>%
+        as.data.frame()
+    )
+
+  simulated_grouped_ledger <- rbind(simulated_grouped_ledger,
+                                    dcast(simulation + financial_year ~ metric, value.var = "n", data = simulated_grouped_ledger, fill = 0) %>%
+                                      mutate(net = joiners - leavers ) %>%
+                                      dplyr::select(simulation, financial_year, net) %>%
+                                      rename(n = net) %>%
+                                      mutate(metric = "net")) %>%
+    mutate(source = "projection")
+
+  simulated_grouped_ledger$metric <- factor(simulated_grouped_ledger$metric, levels = label_levels)
+
+
+  rbind(simulated_grouped_ledger %>%
+          dplyr::group_by(financial_year, metric, source) %>%
+          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975)),
+        grouped_ledger %>%
+          group_by(financial_year, metric, source) %>%
+          dplyr::summarise(lower_95 = quantile(n, 0.025), lower_50 = quantile(n, 0.25), median = median(n), upper_50 = quantile(n, 0.75), upper_95 = quantile(n, 0.975))
+  ) %>%
+    write.csv(file = file.path(output_dir, lattice_top_line_by_year_csv), row.names = FALSE)
+
 }
 
 # input_dir <- ''
