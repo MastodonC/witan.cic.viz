@@ -120,10 +120,10 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
   dev.off()
 }
 
-input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2021-1'
-output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2021-1'
-from_date <- as.Date("2014-03-31")
-to_date <- as.Date("2027-03-31")
-group_ages <- TRUE
- 
-cic_placement_age_group(input_dir, output_dir, from_date, to_date, group_ages)
+# input_dir <- ''
+# output_dir <- ''
+# from_date <- as.Date("2014-03-31")
+# to_date <- as.Date("2027-03-31")
+# group_ages <- TRUE
+#  
+# cic_placement_age_group(input_dir, output_dir, from_date, to_date, group_ages)
