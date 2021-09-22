@@ -31,8 +31,8 @@ generate_leave_age_histograms_plot <- function(input_dir, output_dir, provenance
   ggsave(file.path(output_dir, filename), width = 8, height = 5)
 }
 
-input_dir <- ''
-output_dir <- ''
-provenance = c("S")
-generate_leave_age_histograms_plot(input_dir, output_dir, provenance)
+# input_dir <- ''
+# output_dir <- ''
+# provenance = c("S")
+# generate_leave_age_histograms_plot(input_dir, output_dir, provenance)
 
