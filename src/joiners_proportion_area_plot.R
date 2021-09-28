@@ -38,11 +38,11 @@ generate_joiners_proportion_area_plot <- function(input_dir, output_dir, histori
     write.csv(file = file.path(output_dir, "historic-joiner-proportion.csv"), row.names = FALSE)
 }
 
-input_dir <- ''
-output_dir <- ''
-historic_start <- as.Date("2014-03-01")
-historic_end <-  as.Date("2021-03-31")
-period_start_date <- as.Date("2017-03-01")
-
-generate_joiners_proportion_area_plot(input_dir, output_dir,
-                                      historic_start, historic_end, period_start_date)
+# input_dir <- ''
+# output_dir <- ''
+# historic_start <- as.Date("2014-03-01")
+# historic_end <-  as.Date("2021-03-31")
+# period_start_date <- as.Date("2017-03-01")
+# 
+# generate_joiners_proportion_area_plot(input_dir, output_dir,
+#                                       historic_start, historic_end, period_start_date)
