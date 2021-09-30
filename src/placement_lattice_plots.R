@@ -441,14 +441,14 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
 }
 
 
-input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2019-1'
-output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2019-1'
-historic_start <- as.Date("2014-03-01")
-historic_end <-  as.Date("2021-03-31")
-projection_start <- as.Date("2019-01-31")
-projection_end <- as.Date("2025-03-31")
-group_ages <- FALSE
-
-generate_placement_lattice_plots(input_dir, output_dir,
-                       historic_start, historic_end,
-                       projection_start, projection_end)
+# input_dir <- ''
+# output_dir <- ''
+# historic_start <- as.Date("2014-03-01")
+# historic_end <-  as.Date("2021-03-31")
+# projection_start <- as.Date("2019-01-31")
+# projection_end <- as.Date("2025-03-31")
+# group_ages <- FALSE
+# 
+# generate_placement_lattice_plots(input_dir, output_dir,
+#                        historic_start, historic_end,
+#                        projection_start, projection_end)
