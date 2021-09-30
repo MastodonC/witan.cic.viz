@@ -228,21 +228,15 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
   categories <- placements
   category_labels <- paste(categories, "count of children")
   names(category_labels) <- categories
-  
-  placement_sequence_1 <- c("P1", "A3", "Q1", "A4", "Q2", "A5", "K2", "A6", "H5", "P2")
-  placement_sequence_2 <- c("R1", "S1", "R3","Z1", "R2", "K1", "R5")
-
-  simulated_ci$placement <- factor(simulated_ci$placement, levels = c(placement_sequence_1, placement_sequence_2))
-  grouped_ledger$placement <- factor(grouped_ledger$placement, levels = c(placement_sequence_1, placement_sequence_2))
 
   print(ggplot() +
-          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_1),
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% categories),
                       aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
-          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_1),
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% categories),
                       aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
-          geom_line(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_1),
+          geom_line(data = simulated_ci %>% filter(metric == "cic" & placement %in% categories),
                     aes(month, median, colour = metric), linetype = 3) +
-          geom_line(data = grouped_ledger %>% filter(metric == "cic" & placement %in% placement_sequence_1),
+          geom_line(data = grouped_ledger %>% filter(metric == "cic" & placement %in% categories),
                     aes(month, n, group = simulation, colour = metric),
                     stat = "identity", alpha = 1) +
           facet_wrap(vars(placement), scales = "free_y",
@@ -252,22 +246,22 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
           theme(legend.position = "none") +
           labs(x = "Date", y = "Children"))
 
-  print(ggplot() +
-          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_2),
-                      aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
-          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_2),
-                      aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
-          geom_line(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_2),
-                    aes(month, median, colour = metric), linetype = 3) +
-          geom_line(data = grouped_ledger %>% filter(metric == "cic" & placement %in% placement_sequence_2),
-                    aes(month, n, group = simulation, colour = metric),
-                    stat = "identity", alpha = 1) +
-          facet_wrap(vars(placement), scales = "free_y",
-                     ncol = 2) +
-          scale_colour_manual(values = colours) +
-          scale_fill_manual(values = colours) +
-          theme(legend.position = "none") +
-          labs(x = "Date", y = "Children"))
+  # print(ggplot() +
+  #         geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_2),
+  #                     aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
+  #         geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_2),
+  #                     aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
+  #         geom_line(data = simulated_ci %>% filter(metric == "cic" & placement %in% placement_sequence_2),
+  #                   aes(month, median, colour = metric), linetype = 3) +
+  #         geom_line(data = grouped_ledger %>% filter(metric == "cic" & placement %in% placement_sequence_2),
+  #                   aes(month, n, group = simulation, colour = metric),
+  #                   stat = "identity", alpha = 1) +
+  #         facet_wrap(vars(placement), scales = "free_y",
+  #                    ncol = 2) +
+  #         scale_colour_manual(values = colours) +
+  #         scale_fill_manual(values = colours) +
+  #         theme(legend.position = "none") +
+  #         labs(x = "Date", y = "Children"))
 
   for (category in categories) {
     print(ggplot() +
@@ -447,14 +441,14 @@ generate_placement_lattice_plots <- function(input_dir, output_dir, historic_sta
 }
 
 
-input_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2019-1'
-output_dir <- '/Users/henry/Mastodon C/witan.cic/data/bwd/2021-08-26/outputs-2019-1'
-historic_start <- as.Date("2014-03-01")
-historic_end <-  as.Date("2021-03-31")
-projection_start <- as.Date("2019-01-31")
-projection_end <- as.Date("2025-03-31")
-group_ages <- FALSE
-
-generate_placement_lattice_plots(input_dir, output_dir,
-                       historic_start, historic_end,
-                       projection_start, projection_end)
+# input_dir <- ''
+# output_dir <- ''
+# historic_start <- as.Date("2014-03-01")
+# historic_end <-  as.Date("2021-03-31")
+# projection_start <- as.Date("2019-01-31")
+# projection_end <- as.Date("2025-03-31")
+# group_ages <- FALSE
+# 
+# generate_placement_lattice_plots(input_dir, output_dir,
+#                        historic_start, historic_end,
+#                        projection_start, projection_end)
