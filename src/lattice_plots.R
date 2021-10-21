@@ -6,7 +6,7 @@ library(ggthemes)
 library(tidyquant)
 source("src/helpers.R")
 
-## To generate only historic plots, set `projection_start` and `projection_end` to be 
+## To generate only historic plots, set `projection_start` and `projection_end` to be
 ## one month apart and less than `historic_end`
 ## N.B. you will see a number of warnings as the charting will assume data is missing
 generate_lattice_plots <- function(input_dir, output_dir, historic_start, historic_end, projection_start, projection_end, group_ages = FALSE) {
@@ -43,6 +43,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
       dplyr::group_by(period_id, simulation) %>%
       dplyr::summarise(date = min(period_start), birthday = birthday[1], .groups = "drop") %>%
       dplyr::mutate(age_group = age_category(year_diff(birthday, date), group_ages)) %>%
+      dplyr::filter(age_group > 18) %>%
       dplyr::select(date, simulation, age_group) %>%
       dplyr::mutate(metric = "joiners"),
     bootstrapped_actuals %>%
@@ -84,8 +85,9 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::select(month, age_group, metric, simulation, n) %>%
         as.data.frame()
     ) %>%
-    filter(month >= historic_start & month <= historic_end)
-  
+    filter(month >= historic_start & month <= historic_end) %>%
+    filter(!(age_group == "Age 18"))
+
   grouped_ledger <- rbind(grouped_ledger,
                           dcast(simulation + month + age_group ~ metric, value.var = "n", data = grouped_ledger, fill = 0) %>%
                             mutate(net = joiners + agedin - agedout - leavers) %>%
@@ -168,7 +170,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::select(month, age_group, metric, simulation, n) %>%
         as.data.frame()
     ) %>%
-    filter(month > projection_start & month <= projection_end)
+    filter(month > projection_start & month <= projection_end) %>%
+    filter(!(age_group == "Age 18"))
 
   simulated_grouped_ledger <- rbind(simulated_grouped_ledger,
                                     dcast(simulation + month + age_group ~ metric, value.var = "n", data = simulated_grouped_ledger, fill = 0) %>%
@@ -328,8 +331,8 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         as.data.frame()
     ) %>%
     filter(month >= historic_start & month <= historic_end)
-  
-    
+
+
   grouped_ledger <- rbind(grouped_ledger,
                           dcast(simulation + month ~ metric, value.var = "n", data = grouped_ledger, fill = 0) %>%
                             mutate(net = joiners - leavers ) %>%
