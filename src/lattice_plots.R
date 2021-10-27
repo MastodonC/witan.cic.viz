@@ -260,13 +260,13 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
   grouped_ledger$age_group <- factor(grouped_ledger$age_group, levels = categories)
 
   print(ggplot() +
-          geom_ribbon(data = simulated_ci %>% filter(metric == "cic"),
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & !is.na(age_group)),
                       aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
-          geom_ribbon(data = simulated_ci %>% filter(metric == "cic"),
+          geom_ribbon(data = simulated_ci %>% filter(metric == "cic" & !is.na(age_group)),
                       aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
-          geom_line(data = simulated_ci %>% filter(metric == "cic"),
+          geom_line(data = simulated_ci %>% filter(metric == "cic" & !is.na(age_group)),
                     aes(month, median, colour = metric), linetype = 3) +
-          geom_line(data = grouped_ledger %>% filter(metric == "cic"),
+          geom_line(data = grouped_ledger %>% filter(metric == "cic" & !is.na(age_group)),
                     aes(month, n, group = simulation, colour = metric),
                     stat = "identity", alpha = 1) +
           facet_wrap(vars(age_group), labeller = labeller(metric = state_labels, age_group = category_labels), scales = "free_y",
@@ -278,20 +278,20 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
 
   for (category in categories) {
     print(ggplot() +
-        geom_ribbon(data = simulated_ci %>% filter(age_group == category),
-                    aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
-        geom_ribbon(data = simulated_ci %>% filter(age_group == category),
-                    aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
-        geom_line(data = simulated_ci %>% filter(age_group == category),
-                  aes(month, median, colour = metric), linetype = 3) +
-        geom_line(data = grouped_ledger %>% filter(age_group == category),
-                  aes(month, n, group = simulation, colour = metric),
-                  stat = "identity", alpha = 1) +
-        facet_grid(vars(metric), vars(age_group), labeller = labeller(metric = state_labels, age_group = category_labels), scales = "free_y") +
-        scale_colour_manual(values = colours) +
-        scale_fill_manual(values = colours) +
-        theme(legend.position = "none") +
-        labs(x = "Date", y = "Children"))
+            geom_ribbon(data = simulated_ci %>% filter(age_group == category),
+                        aes(month, ymin = lower_95, ymax = upper_95, fill = metric), alpha = 0.2) +
+            geom_ribbon(data = simulated_ci %>% filter(age_group == category),
+                        aes(month, ymin = lower_50, ymax = upper_50, fill = metric), alpha = 0.2) +
+            geom_line(data = simulated_ci %>% filter(age_group == category),
+                      aes(month, median, colour = metric), linetype = 3) +
+            geom_line(data = grouped_ledger %>% filter(age_group == category),
+                      aes(month, n, group = simulation, colour = metric),
+                      stat = "identity", alpha = 1) +
+            facet_grid(vars(metric), vars(age_group), labeller = labeller(metric = state_labels, age_group = category_labels), scales = "free_y") +
+            scale_colour_manual(values = colours) +
+            scale_fill_manual(values = colours) +
+            theme(legend.position = "none") +
+            labs(x = "Date", y = "Children"))
   }
 
   ## Same but for all cic
