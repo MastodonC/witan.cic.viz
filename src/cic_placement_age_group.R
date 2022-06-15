@@ -83,9 +83,7 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
     )
   }
 
-  all.placements <- c("A3", "A4", "A5", "A6", "H5", "K1", "K2", "M2", "M3", "P1", "P2",
-                      "Q1","Q2", "R1", "R2", "R3", "R5", "S1", "T0", "T4", "Z1",
-                      'Join')
+  all.placements <- as.vector(unique(chart_data$placement))
   placement.colours <- tableau_color_pal("Tableau 20")(20)
   placement.colours <- c(placement.colours, "#888888", "#FFFFFF")
   names(placement.colours) <- all.placements
