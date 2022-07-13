@@ -79,6 +79,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::mutate(age_group = age_category(year_diff(birthday, month), group_ages)) %>%
         dplyr::group_by(month, age_group, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
         complete(month, age_group, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, age_group, metric, simulation, n) %>%
@@ -163,6 +164,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::mutate(age_group = age_category(year_diff(birthday, month), group_ages)) %>%
         dplyr::group_by(month, age_group, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
         complete(month, age_group, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, age_group, metric, simulation, n) %>%
@@ -322,6 +324,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
         complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, metric, simulation, n) %>%
@@ -380,6 +383,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::filter(period_start <= month & period_end >= month) %>%
         dplyr::group_by(month, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
         complete(month, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(month, metric, simulation, n) %>%
@@ -477,6 +481,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::mutate(financial_year = financial_year(month)) %>%
         dplyr::group_by(financial_year, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
         complete(financial_year, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(financial_year, metric, simulation, n) %>%
@@ -533,6 +538,7 @@ generate_lattice_plots <- function(input_dir, output_dir, historic_start, histor
         dplyr::mutate(financial_year = financial_year(month)) %>%
         dplyr::group_by(financial_year, simulation) %>%
         dplyr::summarise(n = n_distinct(period_id)) %>%
+        ungroup %>%
         complete(financial_year, simulation, fill = list(n = 0)) %>%
         dplyr::mutate(metric = "cic") %>%
         dplyr::select(financial_year, metric, simulation, n) %>%
