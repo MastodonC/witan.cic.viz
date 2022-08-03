@@ -80,7 +80,7 @@ generate_dragonfruit_plot <- function(input_dir, output_dir, projection_start) {
   
 }
 
-input_dir <- ''
-output_dir <- ''
-projection_start <- as.Date("2019-03-31")
-generate_dragonfruit_plot(input_dir, output_dir, projection_start)
+# input_dir <- ''
+# output_dir <- ''
+# projection_start <- as.Date("2019-03-31")
+# generate_dragonfruit_plot(input_dir, output_dir, projection_start)
