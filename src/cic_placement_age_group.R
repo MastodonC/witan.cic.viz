@@ -134,6 +134,19 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
   
   pdf(file = file.path(output_dir, cic_by_age_pdf))
   
+  print(ggplot(chart_data %>% group_by(month, age) %>% summarise(n = sum(n)), aes(month, n, fill = factor(age))) +
+          geom_bar(stat = "identity") +
+          labs(x = "Month", y = "Children in care", fill = "Age", title = "Children in care by age") +
+          scale_fill_manual(values = tableau_color_pal("Tableau 20")(20))
+  )
+  
+  print(ggplot(chart_data %>% group_by(month, age) %>% summarise(n = sum(n)), aes(month, n, fill = factor(age))) +
+          geom_bar(stat = "identity", position = "fill") +
+          labs(x = "Month", y = "Children in care", fill = "Age", title = "Children in care by age") +
+          scale_fill_manual(values = tableau_color_pal("Tableau 20")(20)) +
+          scale_y_continuous(breaks = seq(0, 1, by = 0.2), labels = paste0(seq(0, 100, by = 20), "%"))
+  )
+  
   for (the.placement in placements) {
     print(ggplot(chart_data %>% filter(placement == the.placement), aes(month, n, fill = factor(age))) +
             geom_bar(stat = "identity") +
