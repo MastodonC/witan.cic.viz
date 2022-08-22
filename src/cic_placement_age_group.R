@@ -31,6 +31,8 @@ cic_placement_age_group <- function(input_dir, output_dir, from_date, to_date, g
     dplyr::group_by(month, age_group, placement, simulation) %>%
     dplyr::summarise(n = n_distinct(period_id), .groups = "drop_last") %>%
     dplyr::summarise(n = median(n))
+  
+  write.csv(chart_data, file = file.path(output_dir, "cic-placement-age-group.csv"), row.names = FALSE)
 
   categories <- if(group_ages) {age_categories} else {age_labels}
   category_labels <- paste(categories, "count of children")
