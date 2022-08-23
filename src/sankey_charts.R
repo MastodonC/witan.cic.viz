@@ -3,10 +3,17 @@ library(networkD3)
 library(htmlwidgets)
 library(webshot)
 
-sankey_chart <- function(input_dir, output_dir) {
+sankey_chart <- function(input_dir, output_dir, filter_date = "") {
 
   historic_episodes_file <- "historic-episodes.csv"
   historic_episodes <- read.csv(file.path(input_dir, historic_episodes_file))
+
+  if ("" != filter_date) {
+    historic_episodes <- historic_episodes %>%
+      mutate(Period.End = as.Date(Period.End)) %>%
+      filter(Period.End >= as.Date(filter_date)) %>%
+      filter(End != "")
+  }
 
   historic_sequences <- historic_episodes %>% group_by(ID) %>%
     arrange(ID, Start) %>%
