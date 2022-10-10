@@ -1,7 +1,7 @@
 library(dplyr)
 library(networkD3)
 library(htmlwidgets)
-library(webshot)
+library(webshot2)
 
 sankey_chart <- function(input_dir, output_dir, filter_date = "") {
 
